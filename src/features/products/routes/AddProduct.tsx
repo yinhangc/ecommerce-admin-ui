@@ -8,6 +8,7 @@ import { NavigationLayout } from '@/components/Layout/NavigationLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { ProductVariants } from '../components/ProductVariants';
 
 const requiredError = '請填寫此欄位';
 const schema = z.object({
@@ -81,7 +82,6 @@ export const AddProduct = () => {
             </div>
             <div className="flex flex-col gap-y-4 rounded-md bg-white p-4 shadow-md">
               <h3 className="font-medium">相片</h3>
-              {/* TODO: File Upload */}
               <Controller
                 control={control}
                 name="images"
@@ -91,8 +91,8 @@ export const AddProduct = () => {
               ></Controller>
             </div>
             <div className="flex flex-col gap-y-4 rounded-md bg-white p-4 shadow-md">
-              <h3 className="font-medium">選項</h3>
-              {/* TODO: Variants */}
+              <h3 className="font-medium">選項、價格和庫存</h3>
+              <ProductVariants />
             </div>
           </div>
           <div className="col-span-4 flex flex-col gap-y-6">
