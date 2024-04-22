@@ -1,165 +1,115 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { CartesianProduct } from 'js-combinatorics';
+import filter from 'lodash/filter';
+import findIndex from 'lodash/findIndex';
 import { useCallback, useEffect, useState } from 'react';
-import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { z } from 'zod';
-
-type Option = {
-  id: string;
-  name: string;
-  values: OptionValue[];
-};
-type OptionValue = {
-  // id: string;
-  label: string;
-  price: number;
-};
-type ProductOptionInputProps = {
-  option: Option;
-  // handleAddOptionValue: (optionId: string, optionValue: OptionValue) => void;
-};
-const requiredError = '請填寫此欄位';
-const schema = z.object({
-  id: z.string().min(1, requiredError),
-  name: z.string().min(1, requiredError),
-  values: z.any().refine((optionValues: OptionValue[]) => {
-    const optionValuesToBeChecked = optionValues.slice(0, -1);
-    if (optionValuesToBeChecked.length === 0) return false;
-    for (const optionValue of optionValuesToBeChecked) {
-      if (optionValue.label.trim() === '') return false;
-    }
-    return true;
-  }, requiredError),
-});
-type ProductOptionSchemaType = z.infer<typeof schema>;
-
-const ProductOptionInput: React.FC<ProductOptionInputProps> = (props) => {
-  const { option } = props;
-  const {
-    register,
-    control,
-    watch,
-    trigger,
-    formState: { errors },
-  } = useForm<ProductOptionSchemaType>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      id: option.id,
-      name: '',
-      values: [],
-    },
-  });
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'values',
-  });
-
-  const handleSubmit = () => {
-    trigger();
-    console.log('ERRORS', errors);
-  };
-
-  useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
-      console.log('WATCH', value, name, type);
-      const { name: optionName = '', values = [] } = value || {};
-      const hasName =
-        name === 'name' && optionName.length > 0 && values.length === 0;
-      const valueHasLabel =
-        name?.includes('values.') && values[values.length - 1]?.label !== '';
-      if (hasName || valueHasLabel)
-        append({ label: '', price: 0 }, { shouldFocus: false });
-      // Remove input with empty value but not the last elm
-      for (let i = values.length - 1; i >= 0; i--) {
-        if (values[i]?.label?.trim() === '' && i < values.length - 1) {
-          remove(i);
-          break;
-        }
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [append, remove, watch]);
-
-  return (
-    <div className="flex w-full flex-col gap-y-3">
-      <div className="flex flex-col">
-        <label htmlFor="name">選項名字</label>
-        <input
-          placeholder="Option Name"
-          className="rounded border border-gray-400 px-4 py-2"
-          {...register('name')}
-        />
-        {!!errors.name && (
-          <p className="text-sm text-red-600">{errors.name.message}</p>
-        )}
-      </div>
-      <div className="ml-6 flex flex-col gap-y-1">
-        {fields.map((field, index) => {
-          console.log('fff', field);
-          return (
-            <div className="flex flex-col" key={field.id}>
-              <label htmlFor={`values.${index}.label`}>選項數值</label>
-              <input
-                key={field.id}
-                placeholder="Option Value"
-                className="rounded border border-gray-400 px-4 py-2"
-                {...register(`values.${index}.label`)}
-              />
-              {!!errors?.values?.root && !field.label && (
-                <p className="text-sm text-red-600">
-                  {errors.values.root.message as string}
-                </p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <div className="flex gap-x-2">
-        <button
-          type="button"
-          className="w-fit rounded border border-red-600 bg-red-600 px-4 py-1 text-white shadow"
-        >
-          移除
-        </button>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className="w-fit rounded border bg-white px-4 py-1 shadow"
-        >
-          完成
-        </button>
-      </div>
-    </div>
-  );
-};
+import { useFormContext } from 'react-hook-form';
+import { useImmer } from 'use-immer';
+import { AddProductSchemaType, Option, ProductVariant } from '../types';
+import { ProductOptionDisplay } from './ProductOptionDisplay';
+import { ProductOptionInput } from './ProductOptionInput';
+import { ProductVariantCombos } from './ProductVariantCombos';
 
 export const ProductVariants = () => {
-  const [options, setOptions] = useState<Option[]>([]);
+  const [options, setOptions] = useImmer<Option[]>([]);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
+  const { setValue } = useFormContext<AddProductSchemaType>();
 
   const handleAddOption = () => {
-    setOptions([
-      ...options,
-      { id: Math.random().toString(36).substr(2, 5), name: '', values: [] },
-    ]);
+    setOptions((options) => {
+      options.push({
+        id: Math.random().toString(36).substr(2, 5),
+        name: '',
+        values: [],
+        isEditing: true,
+      });
+    });
   };
 
-  // const handleAddOptionValue = (optionId: string, optionValue: OptionValue) => {
-  //   const updatedOption = options.find((opt) => opt.id === optionId);
-  //   if (!updatedOption) return;
-  // };
+  const handleUpdateOption = useCallback(
+    (option: Option) => {
+      setOptions((options) => {
+        const index = findIndex(options, { id: option.id });
+        if (index !== -1) options[index] = option;
+      });
+    },
+    [setOptions],
+  );
+
+  const handleRemoveOption = useCallback(
+    (id: string) => {
+      setOptions((options) => {
+        const index = findIndex(options, { id });
+        if (index !== -1) options.splice(index, 1);
+      });
+    },
+    [setOptions],
+  );
+
+  const handleUpdateVariants = useCallback(
+    (updatedVariants: ProductVariant[]) => {
+      console.log('updatedVariants', updatedVariants);
+      setVariants(updatedVariants);
+    },
+    [setVariants],
+  );
+
+  useEffect(() => {
+    const groups: { [group: string]: string[] } = {};
+    for (const option of filter(options, { isEditing: false })) {
+      groups[option.name] = [];
+      for (const { label } of option.values) groups[option.name].push(label);
+    }
+    const combinations = new CartesianProduct(
+      ...Object.values(groups),
+    ).toArray();
+    const productVariants = [];
+    for (const combo of combinations) {
+      const name = combo.join(' / ');
+      if (combo.join('').trim() === '') continue;
+      productVariants.push({
+        id: Math.random().toString(36).substr(2, 5),
+        name,
+        price: 1,
+        quantity: 0,
+        sku: '',
+      });
+    }
+    handleUpdateVariants(productVariants);
+  }, [options, handleUpdateVariants]);
+
+  useEffect(() => {
+    console.log('update variants');
+    setValue('variants', variants);
+  }, [setValue, variants]);
+
+  useEffect(() => {
+    console.log('update options');
+    setValue('options', options);
+  }, [setValue, options]);
 
   return (
-    <div>
+    <div className="flex flex-col gap-y-4">
       {options.length > 0 && (
-        <div className="mb-6 flex flex-col gap-y-6">
-          {options.map((option) => (
-            <ProductOptionInput
-              key={option.id}
-              option={option}
-              // handleAddOptionValue={handleAddOptionValue}
-            />
-          ))}
+        <div className="flex flex-col gap-y-6">
+          {options.map((option, index) =>
+            option.isEditing ? (
+              <ProductOptionInput
+                key={option.id}
+                option={option}
+                optionIndex={index}
+                handleUpdateOption={handleUpdateOption}
+                handleRemoveOption={handleRemoveOption}
+              />
+            ) : (
+              <ProductOptionDisplay
+                key={option.id}
+                option={option}
+                handleUpdateOption={handleUpdateOption}
+              ></ProductOptionDisplay>
+            ),
+          )}
         </div>
       )}
       <button
@@ -170,6 +120,10 @@ export const ProductVariants = () => {
         <FontAwesomeIcon icon={faPlus} className="mr-1" />
         增加選項
       </button>
+      {/* <ProductVariantCombos
+        variants={variants}
+        handleUpdateVariants={handleUpdateVariants}
+      /> */}
     </div>
   );
 };
