@@ -3,17 +3,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CartesianProduct } from 'js-combinatorics';
 import filter from 'lodash/filter';
 import findIndex from 'lodash/findIndex';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useImmer } from 'use-immer';
-import { AddProductSchemaType, Option, ProductVariant } from '../types';
+import { AddProductSchemaType, Option } from '../types';
 import { ProductOptionDisplay } from './ProductOptionDisplay';
 import { ProductOptionInput } from './ProductOptionInput';
 import { ProductVariantCombos } from './ProductVariantCombos';
 
 export const ProductVariants = () => {
   const [options, setOptions] = useImmer<Option[]>([]);
-  const [variants, setVariants] = useState<ProductVariant[]>([]);
   const { setValue } = useFormContext<AddProductSchemaType>();
 
   const handleAddOption = () => {
@@ -47,13 +46,7 @@ export const ProductVariants = () => {
     [setOptions],
   );
 
-  const handleUpdateVariants = useCallback(
-    (updatedVariants: ProductVariant[]) => {
-      console.log('updatedVariants', updatedVariants);
-      setVariants(updatedVariants);
-    },
-    [setVariants],
-  );
+  useEffect(() => setValue('options', options), [setValue, options]);
 
   useEffect(() => {
     const groups: { [group: string]: string[] } = {};
@@ -76,18 +69,8 @@ export const ProductVariants = () => {
         sku: '',
       });
     }
-    handleUpdateVariants(productVariants);
-  }, [options, handleUpdateVariants]);
-
-  useEffect(() => {
-    console.log('update variants');
-    setValue('variants', variants);
-  }, [setValue, variants]);
-
-  useEffect(() => {
-    console.log('update options');
-    setValue('options', options);
-  }, [setValue, options]);
+    setValue('variants', productVariants);
+  }, [options, setValue]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -120,10 +103,7 @@ export const ProductVariants = () => {
         <FontAwesomeIcon icon={faPlus} className="mr-1" />
         增加選項
       </button>
-      {/* <ProductVariantCombos
-        variants={variants}
-        handleUpdateVariants={handleUpdateVariants}
-      /> */}
+      <ProductVariantCombos />
     </div>
   );
 };

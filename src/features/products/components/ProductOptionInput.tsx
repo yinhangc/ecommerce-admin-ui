@@ -1,4 +1,6 @@
-import { find } from 'lodash';
+import { FormInputField } from '@/components/Form';
+import { find, last } from 'lodash';
+import objectPath from 'object-path';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { AddProductSchemaType, Option } from '../types';
@@ -9,70 +11,24 @@ type ProductOptionInputProps = {
   handleUpdateOption: (option: Option) => void;
   handleRemoveOption: (id: string) => void;
 };
-// const requiredError = '請填寫此欄位';
-// const schema = z.object({
-//   id: z.string().min(1, requiredError),
-//   name: z.string().min(1, requiredError),
-//   values: z
-//     .array(
-//       z.object({
-//         label: z.string(),
-//         price: z.number(),
-//       }),
-//     )
-//     .superRefine((values, ctx) => {
-//       if (values.length === 1 && values[0].label.trim() === '') {
-//         ctx.addIssue({
-//           code: z.ZodIssueCode.custom,
-//           message: requiredError,
-//           path: [0, 'label'],
-//         });
-//       }
-//       for (let i = 0; i < values.length - 2; i++) {
-//         if (values[i].label.trim() === '') {
-//           ctx.addIssue({
-//             code: z.ZodIssueCode.custom,
-//             message: requiredError,
-//             path: [i, 'label'],
-//           });
-//         }
-//       }
-//     }),
-// });
-// type ProductOptionSchemaType = z.infer<typeof schema>;
 
 export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
   props,
 ) => {
   const { option, optionIndex, handleUpdateOption, handleRemoveOption } = props;
-  const [doneBefore, setDoneBefore] = useState(false);
-  // const {
-  //   register,
-  // control,
-  // watch,
-  // trigger,
-  // getValues,
-  // formState: { errors, isValid },
-  // } = useForm<ProductOptionSchemaType>({
-  //   resolver: zodResolver(schema),
-  //   defaultValues: {
-  //     id: option.id,
-  //     name: option.name,
-  //     values: [...option.values, { label: '', price: 0 }],
-  //   },
-  // });
   const {
     register,
     control,
     watch,
     trigger,
     getValues,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useFormContext<AddProductSchemaType>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: `options.${optionIndex}.values`,
   });
+  const [isDoneBefore, setIsDoneBefore] = useState(false);
 
   const handleRemove = () => handleRemoveOption(option.id);
 
@@ -81,24 +37,24 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
     else handleUpdateOption({ ...option, isEditing: false });
   };
 
-  const handleSubmit = () => {
-    setDoneBefore(true);
-    trigger();
+  const handleDone = async () => {
+    setIsDoneBefore(true);
+    await trigger(`options.${optionIndex}`);
     const updatedOption = find(getValues().options, { id: option.id });
     if (!updatedOption) return;
     updatedOption.values = updatedOption.values.filter(
       (values) => values.label !== '',
     );
-    console.log('SUBMIT errors & values', { errors, values: updatedOption });
-    if (isValid) handleUpdateOption({ ...updatedOption, isEditing: false });
+    if (!errors.options)
+      handleUpdateOption({ ...updatedOption, isEditing: false });
   };
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
-      console.log('WATCH', value, name);
       const { name: optionName = '', values = [] } =
         value.options?.[optionIndex] || {};
-      if (doneBefore) trigger();
+      // Revalidate if the field has any error before
+      if (name && objectPath.get(errors, name)) trigger(name);
       // Add option value if there isn't any yet
       const hasName =
         name === `options.${optionIndex}.name` &&
@@ -108,7 +64,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
         name?.includes(`options.${optionIndex}.values.`) &&
         values[values.length - 1]?.label !== '';
       if (hasName || valueHasLabel)
-        append({ label: '', price: 0 }, { shouldFocus: false });
+        append({ label: '' }, { shouldFocus: false });
       // Remove input with empty value but not the last element
       for (let i = values.length - 1; i >= 0; i--) {
         if (values[i]?.label?.trim() === '' && i < values.length - 1) {
@@ -118,48 +74,44 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
       }
     });
     return () => subscription.unsubscribe();
-  }, [append, remove, watch, trigger, doneBefore, optionIndex]);
+  }, [append, remove, watch, optionIndex, errors, trigger]);
+
+  useEffect(() => {
+    const initRender = async () => {
+      await trigger(`options.${optionIndex}`);
+      if (option.name && last(option.values)?.label !== '') {
+        append({ label: '' }, { shouldFocus: false });
+      }
+    };
+    initRender();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [append, optionIndex, trigger]);
 
   return (
     <div className="flex w-full flex-col gap-y-3">
       <div className="flex flex-col">
-        <label htmlFor={`options.${optionIndex}.name`}>選項名字</label>
-        <input
+        <FormInputField<AddProductSchemaType>
+          register={register}
+          name={`options.${optionIndex}.name` as const}
           placeholder="Option Name"
-          className="rounded border border-gray-400 px-4 py-2"
-          {...register(`options.${optionIndex}.name` as const)}
+          error={isDoneBefore ? errors.options?.[optionIndex]?.name : null}
         />
-        {!!errors.name && (
-          <p className="text-sm text-red-600">{errors.name.message}</p>
-        )}
       </div>
       {fields.length > 0 && (
-        <div className="ml-6 flex flex-col gap-y-1">
+        <div className="ml-6 flex flex-col gap-y-3">
           {fields.map((field, index) => {
-            const valueError = errors?.options?.[optionIndex]?.values?.[index];
             return (
-              <div className="flex flex-col" key={field.id}>
-                <label
-                  htmlFor={
-                    `options.${optionIndex}.values.${index}.label` as const
-                  }
-                >
-                  選項數值
-                </label>
-                <input
-                  key={field.id}
-                  placeholder="Option Value"
-                  className="rounded border border-gray-400 px-4 py-2"
-                  {...register(
-                    `options.${optionIndex}.values.${index}.label` as const,
-                  )}
-                />
-                {!!valueError?.label?.message && (
-                  <p className="text-sm text-red-600">
-                    {valueError?.label?.message}
-                  </p>
-                )}
-              </div>
+              <FormInputField<AddProductSchemaType>
+                key={field.id}
+                register={register}
+                name={`options.${optionIndex}.values.${index}.label`}
+                placeholder="Option Value"
+                error={
+                  isDoneBefore
+                    ? errors?.options?.[optionIndex]?.values?.[index]?.label
+                    : null
+                }
+              />
             );
           })}
         </div>
@@ -181,7 +133,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
         </button>
         <button
           type="button"
-          onClick={handleSubmit}
+          onClick={handleDone}
           className="w-fit rounded border border-green-600 bg-white px-4 py-1 text-green-600 shadow"
         >
           完成

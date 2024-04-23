@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   FieldError,
   FieldPath,
@@ -14,7 +13,7 @@ type InputFieldProps<T extends FieldValues> = {
   type?: 'text' | 'number';
   placeholder?: string;
   validationSchema?: RegisterOptions;
-  error?: FieldError;
+  error?: FieldError | null;
   classes?: string;
 };
 

@@ -10,23 +10,25 @@ import {
   Controller,
   FormProvider,
   SubmitHandler,
+  UseFormReturn,
   useForm,
 } from 'react-hook-form';
 import { ProductVariants } from '../components/ProductVariants';
 import { AddProductSchemaType, addProductSchema } from '../types';
 
 export const AddProduct = () => {
-  const methods = useForm<AddProductSchemaType>({
-    resolver: zodResolver(addProductSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-      status: 'inactive',
-      images: [],
-      options: [],
-      variants: [],
-    },
-  });
+  const methods: UseFormReturn<AddProductSchemaType> =
+    useForm<AddProductSchemaType>({
+      resolver: zodResolver(addProductSchema),
+      defaultValues: {
+        name: '',
+        description: '',
+        status: 'inactive',
+        images: [],
+        options: [],
+        variants: [],
+      },
+    });
   const {
     control,
     register,
