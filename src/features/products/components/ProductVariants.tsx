@@ -54,21 +54,28 @@ export const ProductVariants = () => {
       groups[option.name] = [];
       for (const { label } of option.values) groups[option.name].push(label);
     }
+    console.log('groups', groups);
     const combinations = new CartesianProduct(
       ...Object.values(groups),
     ).toArray();
     const productVariants = [];
     for (const combo of combinations) {
+      console.log('combo', combo);
       const name = combo.join(' / ');
       if (combo.join('').trim() === '') continue;
       productVariants.push({
         id: Math.random().toString(36).substr(2, 5),
         name,
+        options: combo.map((value, i) => ({
+          label: Object.keys(groups)[i],
+          value,
+        })),
         price: 1,
         quantity: 0,
         sku: '',
       });
     }
+    console.log(productVariants);
     setValue('variants', productVariants);
   }, [options, setValue]);
 

@@ -43,7 +43,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
     const updatedOption = find(getValues().options, { id: option.id });
     if (!updatedOption) return;
     updatedOption.values = updatedOption.values.filter(
-      (values) => values.label !== '',
+      (values) => values.value !== '',
     );
     if (!errors.options)
       handleUpdateOption({ ...updatedOption, isEditing: false });
@@ -62,12 +62,12 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
         values.length === 0;
       const valueHasLabel =
         name?.includes(`options.${optionIndex}.values.`) &&
-        values[values.length - 1]?.label !== '';
+        values[values.length - 1]?.value !== '';
       if (hasName || valueHasLabel)
-        append({ label: '' }, { shouldFocus: false });
+        append({ value: '' }, { shouldFocus: false });
       // Remove input with empty value but not the last element
       for (let i = values.length - 1; i >= 0; i--) {
-        if (values[i]?.label?.trim() === '' && i < values.length - 1) {
+        if (values[i]?.value?.trim() === '' && i < values.length - 1) {
           remove(i);
           break;
         }
@@ -80,7 +80,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
     const initRender = async () => {
       await trigger(`options.${optionIndex}`);
       if (option.name && last(option.values)?.label !== '') {
-        append({ label: '' }, { shouldFocus: false });
+        append({ value: '' }, { shouldFocus: false });
       }
     };
     initRender();
@@ -108,7 +108,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
                 placeholder="Option Value"
                 error={
                   isDoneBefore
-                    ? errors?.options?.[optionIndex]?.values?.[index]?.label
+                    ? errors?.options?.[optionIndex]?.values?.[index]?.value
                     : null
                 }
               />

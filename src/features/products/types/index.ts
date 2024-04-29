@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export type OptionValue = {
-  label: string;
+  value: string;
 };
 
 export type Option = {
@@ -14,6 +14,10 @@ export type Option = {
 export type ProductVariant = {
   id: string;
   name: string;
+  options: {
+    label: string;
+    value: string;
+  }[];
   price: number;
   quantity: number;
   sku?: string;
@@ -44,13 +48,13 @@ export const addProductSchema = z.object({
       values: z
         .array(
           z.object({
-            label: z.string(),
+            value: z.string(),
           }),
         )
         .superRefine((values, ctx) => {
           if (
             values.length === 0 ||
-            (values.length === 1 && values[0].label.trim() === '')
+            (values.length === 1 && values[0].value.trim() === '')
           ) {
             console.log('SUPER REFINE PROB');
             ctx.addIssue({
@@ -60,7 +64,7 @@ export const addProductSchema = z.object({
             });
           }
           for (let i = 0; i < values.length - 2; i++) {
-            if (values[i].label.trim() === '') {
+            if (values[i].value.trim() === '') {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: requiredError,
@@ -81,6 +85,12 @@ export const addProductSchema = z.object({
       quantity: z
         .number({ invalid_type_error: '請輸入數值' })
         .min(0, '數值不能少過0'),
+      options: z.array(
+        z.object({
+          label: z.string().min(1, requiredError),
+          value: z.string().min(1, requiredError),
+        }),
+      ),
       sku: z.string().optional(),
     }),
   ),
