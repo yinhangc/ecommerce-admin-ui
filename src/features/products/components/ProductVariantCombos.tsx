@@ -1,13 +1,13 @@
 import { FormInputField } from '@/components/Form';
 import { useFormContext } from 'react-hook-form';
-import { AddProductSchemaType } from '../types';
+import { Product } from '../types';
 
 export const ProductVariantCombos = () => {
   const {
     register,
     watch,
     formState: { errors },
-  } = useFormContext<AddProductSchemaType>();
+  } = useFormContext<Product>();
 
   const watchVariants = watch('variants', []);
 
@@ -27,10 +27,10 @@ export const ProductVariantCombos = () => {
             <tr key={id} className="border-b border-neutral-200">
               <td className="px-4 py-2">{name}</td>
               <td className="px-4 py-2">
-                <FormInputField<AddProductSchemaType>
+                <FormInputField<Product>
                   register={register}
                   name={`variants.${index}.price`}
-                  validationSchema={{ min: 1, valueAsNumber: true }}
+                  registerOptions={{ min: 1, valueAsNumber: true }}
                   type="number"
                   placeholder="Price"
                   classes="w-[150px] py-1 px-2"
@@ -38,10 +38,10 @@ export const ProductVariantCombos = () => {
                 />
               </td>
               <td className="px-4 py-2">
-                <FormInputField<AddProductSchemaType>
+                <FormInputField<Product>
                   register={register}
                   name={`variants.${index}.quantity`}
-                  validationSchema={{ min: 0, valueAsNumber: true }}
+                  registerOptions={{ min: 0, valueAsNumber: true }}
                   type="number"
                   placeholder="Quantity"
                   classes="w-[150px] py-1 px-2"
@@ -49,7 +49,7 @@ export const ProductVariantCombos = () => {
                 />
               </td>
               <td className="px-4 py-2">
-                <FormInputField<AddProductSchemaType>
+                <FormInputField<Product>
                   register={register}
                   name={`variants.${index}.sku`}
                   placeholder="SKU"

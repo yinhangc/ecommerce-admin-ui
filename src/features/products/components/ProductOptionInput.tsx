@@ -3,7 +3,7 @@ import { find, last } from 'lodash';
 import objectPath from 'object-path';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { AddProductSchemaType, Option } from '../types';
+import { Product, Option } from '../types';
 
 type ProductOptionInputProps = {
   option: Option;
@@ -23,7 +23,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
     trigger,
     getValues,
     formState: { errors },
-  } = useFormContext<AddProductSchemaType>();
+  } = useFormContext<Product>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: `options.${optionIndex}.values`,
@@ -51,8 +51,10 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
+      console.log({ value, name });
       const { name: optionName = '', values = [] } =
         value.options?.[optionIndex] || {};
+      console.log({ optionName, values });
       // Revalidate if the field has any error before
       if (name && objectPath.get(errors, name)) trigger(name);
       // Add option value if there isn't any yet
@@ -63,6 +65,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
       const valueHasLabel =
         name?.includes(`options.${optionIndex}.values.`) &&
         values[values.length - 1]?.value !== '';
+      console.log({ hasName, valueHasLabel });
       if (hasName || valueHasLabel)
         append({ value: '' }, { shouldFocus: false });
       // Remove input with empty value but not the last element
@@ -79,7 +82,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
   useEffect(() => {
     const initRender = async () => {
       await trigger(`options.${optionIndex}`);
-      if (option.name && last(option.values)?.label !== '') {
+      if (option.name && last(option.values)?.value !== '') {
         append({ value: '' }, { shouldFocus: false });
       }
     };
@@ -90,7 +93,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
   return (
     <div className="flex w-full flex-col gap-y-3">
       <div className="flex flex-col">
-        <FormInputField<AddProductSchemaType>
+        <FormInputField<Product>
           register={register}
           name={`options.${optionIndex}.name` as const}
           placeholder="Option Name"
@@ -101,10 +104,10 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
         <div className="ml-6 flex flex-col gap-y-3">
           {fields.map((field, index) => {
             return (
-              <FormInputField<AddProductSchemaType>
+              <FormInputField<Product>
                 key={field.id}
                 register={register}
-                name={`options.${optionIndex}.values.${index}.label`}
+                name={`options.${optionIndex}.values.${index}.value`}
                 placeholder="Option Value"
                 error={
                   isDoneBefore

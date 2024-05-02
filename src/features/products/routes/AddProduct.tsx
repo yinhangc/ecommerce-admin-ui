@@ -14,30 +14,46 @@ import {
   useForm,
 } from 'react-hook-form';
 import { ProductVariants } from '../components/ProductVariants';
-import { AddProductSchemaType, addProductSchema } from '../types';
+import { Product, productSchema } from '../types';
+import { useCreateProductMutation } from '../api/products';
+import { useUploadFilesMutation } from '@/features/blobs/api/blobs';
 
 export const AddProduct = () => {
-  const methods: UseFormReturn<AddProductSchemaType> =
-    useForm<AddProductSchemaType>({
-      resolver: zodResolver(addProductSchema),
-      defaultValues: {
-        name: '',
-        description: '',
-        status: 'inactive',
-        images: [],
-        options: [],
-        variants: [],
-      },
-    });
+  const [createProduct, { isLoading: isCreateProductLoading }] =
+    useCreateProductMutation();
+  const [uploadFiles, { isLoading: isUploadFilesLoading }] =
+    useUploadFilesMutation();
+  const methods: UseFormReturn<Product> = useForm<Product>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      status: 'INACTIVE',
+      images: [],
+      options: [],
+      variants: [],
+    },
+  });
   const {
     control,
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = methods;
-
-  const onSubmit: SubmitHandler<AddProductSchemaType> = (data) => {
+  const onSubmit: SubmitHandler<Product> = async (data) => {
     console.log('data', data);
+    let uploadImagesRes: string[] = [];
+    if (data.images.length > 0) {
+      const formData = new FormData();
+      for (const image of data.images) formData.append('image', image);
+      uploadImagesRes = await uploadFiles(formData).unwrap();
+      console.log('uploadImagesRes', uploadImagesRes);
+    }
+    await createProduct({
+      ...data,
+      imageUrls: uploadImagesRes,
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
@@ -58,10 +74,10 @@ export const AddProduct = () => {
               <div className="flex flex-col gap-y-4 rounded-md bg-white px-6 py-4 shadow-md">
                 <h3 className="font-medium">一般資料</h3>
                 <div className="w-full">
-                  <FormInputField<AddProductSchemaType>
+                  <FormInputField<Product>
                     register={register}
                     name="name"
-                    validationSchema={{ required: true }}
+                    registerOptions={{ required: true }}
                     label="名字"
                     placeholder="Name"
                     error={errors['name']}
@@ -101,8 +117,8 @@ export const AddProduct = () => {
                   required={true}
                   register={register}
                   options={[
-                    { label: 'Active', value: 'active' },
-                    { label: 'Inactive', value: 'inactive' },
+                    { label: 'Active', value: 'ACTIVE' },
+                    { label: 'Inactive', value: 'INACTIVE' },
                   ]}
                   classes="flex-1"
                 />

@@ -7,12 +7,12 @@ import {
 } from 'react-hook-form';
 
 type InputFieldProps<T extends FieldValues> = {
-  name: string;
+  name: FieldPath<T>;
   register: UseFormRegister<T>;
   label?: string;
   type?: 'text' | 'number';
   placeholder?: string;
-  validationSchema?: RegisterOptions;
+  registerOptions?: RegisterOptions;
   error?: FieldError | null;
   classes?: string;
 };
@@ -26,7 +26,7 @@ export const FormInputField = <T extends FieldValues>(
     label,
     type = 'text',
     placeholder,
-    validationSchema,
+    registerOptions,
     error,
     classes,
   } = props;
@@ -36,7 +36,7 @@ export const FormInputField = <T extends FieldValues>(
       {!!label && (
         <label htmlFor={name}>
           {label}
-          {validationSchema?.required && (
+          {registerOptions?.required && (
             <span className="ml-1 text-red-600">*</span>
           )}
         </label>
@@ -45,7 +45,7 @@ export const FormInputField = <T extends FieldValues>(
         placeholder={placeholder}
         className="rounded border border-gray-400 px-4 py-2"
         type={type}
-        {...register(name as FieldPath<T>, validationSchema)}
+        {...register(name, registerOptions)}
       />
       {!!error && <p className="text-sm text-red-600">{error.message}</p>}
     </div>
