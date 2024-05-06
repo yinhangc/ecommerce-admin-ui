@@ -11,6 +11,7 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
+  ColumnFilter,
 } from '@tanstack/react-table';
 import moment from 'moment';
 import { useCallback, useEffect, useState } from 'react';
@@ -23,23 +24,11 @@ export const ListProduct = () => {
     rows: [],
     count: 0,
   });
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 1,
   });
-
-  const loadData = useCallback(async () => {
-    const res = await listProduct({
-      skip: pagination.pageSize * pagination.pageIndex,
-      take: pagination.pageSize,
-    }).unwrap();
-    console.log('(loadData) List product', res);
-    setData(res);
-  }, [listProduct, pagination.pageIndex, pagination.pageSize]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   const columnHelper = createColumnHelper<ProductInList>();
   const columns = [
@@ -69,7 +58,7 @@ export const ListProduct = () => {
       meta: {
         filter: {
           variant: 'select',
-          matchField: 'LIKE_status',
+          matchField: 'EQUAL_status',
           options: [
             { label: 'Active', value: 'ACTIVE' },
             { label: 'Inactive', value: 'INACTIVE' },
@@ -124,13 +113,41 @@ export const ListProduct = () => {
     data: data.rows,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    manualFiltering: true,
+    onColumnFiltersChange: setColumnFilters,
     manualPagination: true,
     rowCount: data.count,
     onPaginationChange: setPagination,
     state: {
+      columnFilters,
       pagination,
     },
   });
+
+  const loadData = useCallback(async () => {
+    const res = await listProduct({
+      skip: pagination.pageSize * pagination.pageIndex,
+      take: pagination.pageSize,
+    }).unwrap();
+    console.log('(loadData) List product', res);
+    setData(res);
+  }, [listProduct, pagination.pageIndex, pagination.pageSize]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    const filter: { [key: string]: string | number } = {};
+    console.log('columnFilters', columnFilters);
+    for (const columnFilter of columnFilters) {
+      const column = table.getColumn(columnFilter.id);
+      if (!column?.columnDef.meta?.filter) continue;
+      const { variant, matchField, options } = column.columnDef.meta.filter;
+      filter[matchField] = columnFilter.value as string | number;
+    }
+    console.log('FILTER!', filter);
+  }, [columnFilters, table]);
 
   const getHeaderFilter = (column: Column<ProductInList, unknown>) => {
     // console.log('getHeaderFilter', column);
