@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// #region - AddProduct
 export type OptionValue = {
   value: string;
 };
@@ -106,3 +107,24 @@ export const productSchema = z.object({
   ),
 });
 export type Product = z.infer<typeof productSchema>;
+// #endregion
+
+// #region - ListProduct
+export type ListProductPayload = {
+  skip: number;
+  take: number;
+  where?: { [key: string]: unknown };
+  orderBy?: { [key: string]: 'asc' | 'desc' }[];
+};
+export type ProductInList = {
+  name: string;
+  description: string;
+  skus: {
+    sku: string;
+    price: number;
+  }[];
+  status: 'ACTIVE' | 'INACTIVE';
+  createdAt: string;
+  updatedAt: string;
+};
+// #endregion

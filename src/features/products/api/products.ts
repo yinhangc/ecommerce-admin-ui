@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Product } from '../types';
+import { ListProductPayload, Product, ProductInList } from '../types';
 
 export const productsApi = createApi({
   reducerPath: 'productsApi',
@@ -14,7 +14,17 @@ export const productsApi = createApi({
         body,
       }),
     }),
+    listProduct: builder.mutation<
+      { rows: ProductInList[]; count: number },
+      ListProductPayload
+    >({
+      query: (body) => ({
+        url: '/list',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useCreateProductMutation } = productsApi;
+export const { useCreateProductMutation, useListProductMutation } = productsApi;
