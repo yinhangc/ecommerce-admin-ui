@@ -113,10 +113,11 @@ export type Product = z.infer<typeof productSchema>;
 export type ListProductPayload = {
   skip: number;
   take: number;
-  where?: { [key: string]: unknown };
-  orderBy?: { [key: string]: 'asc' | 'desc' }[];
+  filter: { [key: string]: string | number };
+  orderBy: { [key: string]: 'asc' | 'desc' }[];
 };
 export type ProductInList = {
+  id: number;
   name: string;
   description: string;
   skus: {

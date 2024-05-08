@@ -34,7 +34,7 @@ export const NavigationLayout = ({ children }: NavigationLayoutProps) => {
               </li>
               <li className="mt-1">
                 <NavLink
-                  to="/products/add"
+                  to="/products/create"
                   className={({ isActive }) =>
                     clsx(
                       'ml-6 inline-block w-[calc(100%-24px)] rounded px-3 py-1',

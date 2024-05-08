@@ -109,11 +109,9 @@ export const ProductVariants = () => {
     const subscription = watch((value, { name, type }) => {
       if (name !== 'haveProductOptions') return;
       setOptions([]);
-      if (value.haveProductOptions === 'false') {
+      if (value.haveProductOptions === 'false')
         setValue('variants', [defaultVariantIfNoProductOptions]);
-      } else {
-        setValue('variants', []);
-      }
+      else setValue('variants', []);
       setHaveProductOptions(value.haveProductOptions === 'true');
     });
     return () => subscription.unsubscribe();

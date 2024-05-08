@@ -26,6 +26,7 @@
     "@tiptap/pm": "^2.3.0",
     "@tiptap/react": "^2.3.0",
     "@tiptap/starter-kit": "^2.3.0",
+    "change-case": "^5.4.4",
     "clsx": "^2.1.0",
     "immer": "^10.0.4",
     "js-combinatorics": "^2.1.2",

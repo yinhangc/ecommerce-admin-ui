@@ -6,18 +6,10 @@ declare module '@tanstack/react-table' {
     filter: {
       variant: 'text' | 'select';
       matchField: string;
-      options?: { label: string; value: string }[]; // select
+      options?: {
+        label: string;
+        value: string | '<--SELECT DEFAULT VALUE-->';
+      }[]; // select
     };
   }
 }
-
-/*
-where: {
-    skus: {
-        sku: {
-            has: '...',
-            mode: 'insensitive',
-        },
-    },
-},
-*/

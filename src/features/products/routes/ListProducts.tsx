@@ -5,7 +5,6 @@ import {
   faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useWhatChanged } from '@simbathesailor/use-what-changed';
 import {
   Column,
   ColumnFilter,
@@ -15,13 +14,17 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { sentenceCase } from 'change-case';
+import { debounce } from 'lodash';
 import moment from 'moment';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { useListProductMutation } from '../api/products';
-import { ProductInList } from '../types';
+import { ListProductPayload, ProductInList } from '../types';
 
-export const ListProduct = () => {
+export const ListProducts = () => {
   const [listProduct] = useListProductMutation();
+  const memoizedListProduct = useMemo(() => listProduct, [listProduct]);
   const [data, setData] = useState<{ rows: ProductInList[]; count: number }>({
     rows: [],
     count: 0,
@@ -30,16 +33,21 @@ export const ListProduct = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 1,
+    pageSize: 10,
   });
 
   const columnHelper = createColumnHelper<ProductInList>();
   const columns = [
     columnHelper.display({
-      id: 'view',
+      id: 'details',
       cell: (props) => (
         <button>
-          <FontAwesomeIcon icon={faEye} />
+          <NavLink
+            to={`/products/list/${props.row.original.id}/details`}
+            className="block h-full w-full"
+          >
+            <FontAwesomeIcon icon={faEye} />
+          </NavLink>
         </button>
       ),
       enableSorting: false,
@@ -56,7 +64,7 @@ export const ListProduct = () => {
       },
     }),
     columnHelper.accessor('status', {
-      cell: (info) => info.getValue().toLowerCase(),
+      cell: (info) => sentenceCase(info.getValue()),
       header: () => <span>狀態</span>,
       footer: (props) => props.column.id,
       meta: {
@@ -64,11 +72,13 @@ export const ListProduct = () => {
           variant: 'select',
           matchField: 'EQUAL_status',
           options: [
+            { label: 'All', value: '<--SELECT DEFAULT VALUE-->' },
             { label: 'Active', value: 'ACTIVE' },
             { label: 'Inactive', value: 'INACTIVE' },
           ],
         },
       },
+      enableSorting: false,
     }),
     columnHelper.accessor('skus', {
       cell: (info) => {
@@ -93,6 +103,7 @@ export const ListProduct = () => {
           matchField: 'IN_skus.sku',
         },
       },
+      enableSorting: false,
     }),
     columnHelper.accessor('createdAt', {
       cell: (info) =>
@@ -131,55 +142,43 @@ export const ListProduct = () => {
     },
   });
 
-  const memoizedListProduct = useMemo(() => listProduct, [listProduct]);
-  const loadData = useCallback(async () => {
-    const filter: { [key: string]: string | number } = {};
-    for (const columnFilter of columnFilters) {
-      const column = table.getColumn(columnFilter.id);
-      if (!column?.columnDef.meta?.filter) continue;
-      const { variant, matchField, options } = column.columnDef.meta.filter;
-      filter[matchField] = columnFilter.value as string | number;
-    }
-    console.log('(loadData) FILTER!', filter);
-    console.log('(loadData) SORTING!', sorting);
-    const res = await memoizedListProduct({
-      skip: pagination.pageSize * pagination.pageIndex,
-      take: pagination.pageSize,
-    }).unwrap();
-    console.log('(loadData) List Product', res);
-    setData(res);
-  }, [
-    columnFilters,
-    memoizedListProduct,
-    pagination.pageIndex,
-    pagination.pageSize,
-    sorting,
-    table,
-  ]);
-  useWhatChanged([
-    columnFilters,
-    memoizedListProduct,
-    pagination.pageIndex,
-    pagination.pageSize,
-    sorting,
-    table,
-  ]);
+  const loadData = useCallback(
+    debounce(async () => {
+      const filter: ListProductPayload['filter'] = {};
+      for (const columnFilter of columnFilters) {
+        const column = table.getColumn(columnFilter.id);
+        if (!column?.columnDef.meta?.filter) continue;
+        const { matchField } = column.columnDef.meta.filter;
+        if (columnFilter.value !== '<--SELECT DEFAULT VALUE-->')
+          filter[matchField] = columnFilter.value as string | number;
+      }
+      const orderBy: ListProductPayload['orderBy'] = [];
+      for (const { id, desc } of sorting)
+        orderBy.push({ [id]: desc ? 'desc' : 'asc' });
+      console.log('(loadData) FILTER!', filter);
+      console.log('(loadData) ORDERBY!', orderBy);
+      const res = await memoizedListProduct({
+        skip: pagination.pageSize * pagination.pageIndex,
+        take: pagination.pageSize,
+        filter,
+        orderBy,
+      }).unwrap();
+      console.log('(loadData) List Product RES', res);
+      setData(res);
+    }, 1200),
+    [
+      columnFilters,
+      memoizedListProduct,
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      table,
+    ],
+  );
 
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  // useEffect(() => {
-  //   const filter: { [key: string]: string | number } = {};
-  //   for (const columnFilter of columnFilters) {
-  //     const column = table.getColumn(columnFilter.id);
-  //     if (!column?.columnDef.meta?.filter) continue;
-  //     const { variant, matchField, options } = column.columnDef.meta.filter;
-  //     filter[matchField] = columnFilter.value as string | number;
-  //   }
-  //   console.log('FILTER!', filter);
-  //   console.log('SORTING!', sorting);
-  // }, [sorting, columnFilters, table]);
 
   const getHeaderFilter = (column: Column<ProductInList, unknown>) => {
     const columnFilter = column.columnDef.meta?.filter;
@@ -268,7 +267,7 @@ export const ListProduct = () => {
 
   const getNav = () => {
     const currentPage = table.getState().pagination.pageIndex + 1;
-    const totalPage = table.getPageCount();
+    const totalPage = table.getPageCount() === 0 ? 1 : table.getPageCount();
     const pageLimit = table.getState().pagination.pageSize;
     return (
       <nav
@@ -284,7 +283,6 @@ export const ListProduct = () => {
             value={pageLimit}
             onChange={(e) => table.setPageSize(Number(e.target.value))}
           >
-            <option value={1}>1</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>

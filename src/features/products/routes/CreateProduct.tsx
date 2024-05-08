@@ -5,6 +5,7 @@ import {
 } from '@/components/Form';
 import { FormImageUpload } from '@/components/Form/FormImageUpload';
 import { NavigationLayout } from '@/components/Layout/NavigationLayout';
+import { useUploadFilesMutation } from '@/features/blobs/api/blobs';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Controller,
@@ -13,12 +14,11 @@ import {
   UseFormReturn,
   useForm,
 } from 'react-hook-form';
+import { useCreateProductMutation } from '../api/products';
 import { ProductVariants } from '../components/ProductVariants';
 import { Product, productSchema } from '../types';
-import { useCreateProductMutation } from '../api/products';
-import { useUploadFilesMutation } from '@/features/blobs/api/blobs';
 
-export const AddProduct = () => {
+export const CreateProduct = () => {
   const [createProduct, { isLoading: isCreateProductLoading }] =
     useCreateProductMutation();
   const [uploadFiles, { isLoading: isUploadFilesLoading }] =
@@ -39,7 +39,6 @@ export const AddProduct = () => {
     register,
     handleSubmit,
     formState: { errors },
-    getValues,
   } = methods;
   const onSubmit: SubmitHandler<Product> = async (data) => {
     console.log('data', data);

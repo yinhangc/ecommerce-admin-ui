@@ -95,7 +95,7 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
       <div className="flex flex-col">
         <FormInputField<Product>
           register={register}
-          name={`options.${optionIndex}.name` as const}
+          name={`options.${optionIndex}.name`}
           placeholder="Option Name"
           error={isDoneBefore ? errors.options?.[optionIndex]?.name : null}
         />
