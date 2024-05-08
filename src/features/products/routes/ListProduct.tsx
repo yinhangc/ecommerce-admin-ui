@@ -5,13 +5,15 @@ import {
   faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useWhatChanged } from '@simbathesailor/use-what-changed';
 import {
   Column,
+  ColumnFilter,
+  SortingState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
-  ColumnFilter,
 } from '@tanstack/react-table';
 import moment from 'moment';
 import { useCallback, useEffect, useState } from 'react';
@@ -25,6 +27,7 @@ export const ListProduct = () => {
     count: 0,
   });
   const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 1,
@@ -39,6 +42,7 @@ export const ListProduct = () => {
           <FontAwesomeIcon icon={faEye} />
         </button>
       ),
+      enableSorting: false,
     }),
     columnHelper.accessor('name', {
       cell: (info) => info.getValue(),
@@ -115,45 +119,70 @@ export const ListProduct = () => {
     getCoreRowModel: getCoreRowModel(),
     manualFiltering: true,
     onColumnFiltersChange: setColumnFilters,
+    manualSorting: true,
+    onSortingChange: setSorting,
     manualPagination: true,
     rowCount: data.count,
     onPaginationChange: setPagination,
     state: {
       columnFilters,
+      sorting,
       pagination,
     },
   });
 
   const loadData = useCallback(async () => {
-    const res = await listProduct({
-      skip: pagination.pageSize * pagination.pageIndex,
-      take: pagination.pageSize,
-    }).unwrap();
-    console.log('(loadData) List product', res);
-    setData(res);
-  }, [listProduct, pagination.pageIndex, pagination.pageSize]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  useEffect(() => {
     const filter: { [key: string]: string | number } = {};
-    console.log('columnFilters', columnFilters);
     for (const columnFilter of columnFilters) {
       const column = table.getColumn(columnFilter.id);
       if (!column?.columnDef.meta?.filter) continue;
       const { variant, matchField, options } = column.columnDef.meta.filter;
       filter[matchField] = columnFilter.value as string | number;
     }
-    console.log('FILTER!', filter);
-  }, [columnFilters, table]);
+    console.log('(loadData) FILTER!', filter);
+    console.log('(loadData) SORTING!', sorting);
+    const res = await listProduct({
+      skip: pagination.pageSize * pagination.pageIndex,
+      take: pagination.pageSize,
+    }).unwrap();
+    console.log('(loadData) List Product', res);
+    setData(res);
+  }, [
+    columnFilters,
+    listProduct,
+    pagination.pageIndex,
+    pagination.pageSize,
+    sorting,
+    table,
+  ]);
+  useWhatChanged([
+    columnFilters,
+    listProduct,
+    pagination.pageIndex,
+    pagination.pageSize,
+    sorting,
+    table,
+  ]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // useEffect(() => {
+  //   const filter: { [key: string]: string | number } = {};
+  //   for (const columnFilter of columnFilters) {
+  //     const column = table.getColumn(columnFilter.id);
+  //     if (!column?.columnDef.meta?.filter) continue;
+  //     const { variant, matchField, options } = column.columnDef.meta.filter;
+  //     filter[matchField] = columnFilter.value as string | number;
+  //   }
+  //   console.log('FILTER!', filter);
+  //   console.log('SORTING!', sorting);
+  // }, [sorting, columnFilters, table]);
 
   const getHeaderFilter = (column: Column<ProductInList, unknown>) => {
-    // console.log('getHeaderFilter', column);
     const columnFilter = column.columnDef.meta?.filter;
     const columnFilterValue = column.getFilterValue();
-    console.log('columnFilterValue!', columnFilterValue);
     switch (columnFilter?.variant) {
       case 'text': {
         return (
@@ -199,22 +228,22 @@ export const ListProduct = () => {
                 {headerGroup.headers.map((header) => {
                   return (
                     <th key={header.id} className="px-6 py-3">
-                      <div
-                        {...{
-                          className: header.column.getCanSort()
-                            ? 'cursor-pointer select-none'
-                            : '',
-                          onClick: header.column.getToggleSortingHandler(),
-                        }}
-                      >
+                      <div>
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                        {/* {{
-                  asc: ' 🔼',
-                  desc: ' 🔽',
-                }[header.column.getIsSorted() as string] ?? null} */}
+                        {header.column.getCanSort() && (
+                          <span
+                            className="cursor-pointer"
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {{
+                              asc: ' 🔼',
+                              desc: ' 🔽',
+                            }[header.column.getIsSorted() as string] ?? ' ↕️'}
+                          </span>
+                        )}
                       </div>
                     </th>
                   );
