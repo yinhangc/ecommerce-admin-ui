@@ -16,7 +16,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import moment from 'moment';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useListProductMutation } from '../api/products';
 import { ProductInList } from '../types';
 
@@ -131,6 +131,7 @@ export const ListProduct = () => {
     },
   });
 
+  const memoizedListProduct = useMemo(() => listProduct, [listProduct]);
   const loadData = useCallback(async () => {
     const filter: { [key: string]: string | number } = {};
     for (const columnFilter of columnFilters) {
@@ -141,7 +142,7 @@ export const ListProduct = () => {
     }
     console.log('(loadData) FILTER!', filter);
     console.log('(loadData) SORTING!', sorting);
-    const res = await listProduct({
+    const res = await memoizedListProduct({
       skip: pagination.pageSize * pagination.pageIndex,
       take: pagination.pageSize,
     }).unwrap();
@@ -149,7 +150,7 @@ export const ListProduct = () => {
     setData(res);
   }, [
     columnFilters,
-    listProduct,
+    memoizedListProduct,
     pagination.pageIndex,
     pagination.pageSize,
     sorting,
@@ -157,7 +158,7 @@ export const ListProduct = () => {
   ]);
   useWhatChanged([
     columnFilters,
-    listProduct,
+    memoizedListProduct,
     pagination.pageIndex,
     pagination.pageSize,
     sorting,
