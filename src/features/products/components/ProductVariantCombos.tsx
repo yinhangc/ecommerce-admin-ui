@@ -9,7 +9,7 @@ export const ProductVariantCombos = () => {
     formState: { errors },
   } = useFormContext<Product>();
 
-  const watchVariants = watch('variants', []);
+  const variants = watch('variants', []);
 
   return (
     <div className="overflow-x-scroll rounded-md border">
@@ -23,7 +23,7 @@ export const ProductVariantCombos = () => {
           </tr>
         </thead>
         <tbody>
-          {watchVariants?.map(({ id, name }, index) => (
+          {variants?.map(({ id, name }, index) => (
             <tr key={id} className="border-b border-neutral-200">
               <td className="px-4 py-2">{name}</td>
               <td className="px-4 py-2">

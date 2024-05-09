@@ -28,7 +28,6 @@
     "@tiptap/starter-kit": "^2.3.0",
     "change-case": "^5.4.4",
     "clsx": "^2.1.0",
-    "immer": "^10.0.4",
     "js-combinatorics": "^2.1.2",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",

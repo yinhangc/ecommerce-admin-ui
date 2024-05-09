@@ -3,11 +3,11 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CartesianProduct } from 'js-combinatorics';
+import { cloneDeep } from 'lodash';
 import filter from 'lodash/filter';
 import findIndex from 'lodash/findIndex';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm, useFormContext } from 'react-hook-form';
-import { useImmer } from 'use-immer';
 import {
   HaveProductOptions,
   Option,
@@ -19,53 +19,56 @@ import { ProductOptionInput } from './ProductOptionInput';
 import { ProductVariantCombos } from './ProductVariantCombos';
 
 export const ProductVariants = () => {
-  const [options, setOptions] = useImmer<Option[]>([]);
   const {
     register,
     setValue,
+    getValues,
     formState: { errors },
+    watch,
   } = useFormContext<Product>();
-  const { register: registerHaveProductOptions, watch } =
-    useForm<HaveProductOptions>({
-      resolver: zodResolver(haveProductOptionsSchema),
-      defaultValues: {
-        haveProductOptions: 'false',
-      },
-    });
-  const [haveProductOptions, setHaveProductOptions] = useState(false);
+  const {
+    register: registerHaveProductOptions,
+    watch: watchHaveProductOptions,
+  } = useForm<HaveProductOptions>({
+    resolver: zodResolver(haveProductOptionsSchema),
+    defaultValues: {
+      haveProductOptions: 'false',
+    },
+  });
+  const options = watch('options');
+  const haveProductOptions =
+    watchHaveProductOptions('haveProductOptions') === 'true';
 
   const handleAddOption = () => {
-    setOptions((options) => {
-      options.push({
-        id: Math.random().toString(36).substr(2, 5),
-        name: '',
-        values: [],
-        isEditing: true,
-      });
+    const options = cloneDeep(getValues('options'));
+    options.push({
+      id: Math.random().toString(36).substr(2, 5),
+      name: '',
+      values: [],
+      isEditing: true,
     });
+    setValue('options', options);
   };
 
   const handleUpdateOption = useCallback(
     (option: Option) => {
-      setOptions((options) => {
-        const index = findIndex(options, { id: option.id });
-        if (index !== -1) options[index] = option;
-      });
+      const options = cloneDeep(getValues('options'));
+      const index = findIndex(options, { id: option.id });
+      if (index !== -1) options[index] = option;
+      setValue('options', options);
     },
-    [setOptions],
+    [getValues, setValue],
   );
 
   const handleRemoveOption = useCallback(
     (id: string) => {
-      setOptions((options) => {
-        const index = findIndex(options, { id });
-        if (index !== -1) options.splice(index, 1);
-      });
+      const options = cloneDeep(getValues('options'));
+      const index = findIndex(options, { id });
+      if (index !== -1) options.splice(index, 1);
+      setValue('options', options);
     },
-    [setOptions],
+    [getValues, setValue],
   );
-
-  useEffect(() => setValue('options', options), [setValue, options]);
 
   useEffect(() => {
     const groups: { [group: string]: string[] } = {};
@@ -106,17 +109,19 @@ export const ProductVariants = () => {
     };
     if (!haveProductOptions)
       setValue('variants', [defaultVariantIfNoProductOptions]);
-    const subscription = watch((value, { name, type }) => {
+    const subscription = watchHaveProductOptions((value, { name, type }) => {
       if (name !== 'haveProductOptions') return;
-      setOptions([]);
-      if (value.haveProductOptions === 'false')
-        setValue('variants', [defaultVariantIfNoProductOptions]);
-      else setValue('variants', []);
-      setHaveProductOptions(value.haveProductOptions === 'true');
+      setValue('options', []);
+      setValue(
+        'variants',
+        value.haveProductOptions === 'false'
+          ? [defaultVariantIfNoProductOptions]
+          : [],
+      );
     });
     return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setOptions, setValue, watch]);
+  }, [setValue, watchHaveProductOptions]);
 
   return (
     <div className="flex flex-col gap-y-4">

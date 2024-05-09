@@ -84,6 +84,7 @@ export const productSchema = z.object({
             }
           }
         }),
+      isEditing: z.boolean().optional(),
     }),
   ),
   variants: z.array(
