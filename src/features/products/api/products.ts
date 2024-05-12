@@ -24,7 +24,18 @@ export const productsApi = createApi({
         body,
       }),
     }),
+    getProduct: builder.query<Product, string>({
+      query: (id) => ({ url: `/${id}` }),
+      transformResponse: (response: Product, meta, arg) => {
+        for (const option of response.options) option.isEditing = false;
+        return response;
+      },
+    }),
   }),
 });
 
-export const { useCreateProductMutation, useListProductMutation } = productsApi;
+export const {
+  useCreateProductMutation,
+  useListProductMutation,
+  useGetProductQuery,
+} = productsApi;

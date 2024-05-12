@@ -1,25 +1,25 @@
 import { FormInputField } from '@/components/Form';
-import { find, last } from 'lodash';
+import { cloneDeep, find, last } from 'lodash';
 import objectPath from 'object-path';
-import { useEffect, useState } from 'react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { Product, Option } from '../types';
 
-type ProductOptionInputProps = {
+type ProductOptionsInputProps = {
   option: Option;
   optionIndex: number;
   handleUpdateOption: (option: Option) => void;
-  handleRemoveOption: (id: string) => void;
+  handleRemoveOption: (id: string | number) => void;
 };
 
-export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
+export const ProductOptionsInput: React.FC<ProductOptionsInputProps> = (
   props,
 ) => {
+  const initialValue = useRef<Option>();
   const { option, optionIndex, handleUpdateOption, handleRemoveOption } = props;
   const {
     register,
     control,
-    watch,
     trigger,
     getValues,
     formState: { errors },
@@ -33,8 +33,10 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
   const handleRemove = () => handleRemoveOption(option.id);
 
   const handleCancel = () => {
-    if (option.name === '' && option.values.length === 0) handleRemove();
-    else handleUpdateOption({ ...option, isEditing: false });
+    const option = initialValue.current;
+    if (option && option.label !== '')
+      handleUpdateOption({ ...option, isEditing: false });
+    else handleRemove();
   };
 
   const handleDone = async () => {
@@ -49,55 +51,39 @@ export const ProductOptionInput: React.FC<ProductOptionInputProps> = (
       handleUpdateOption({ ...updatedOption, isEditing: false });
   };
 
-  useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      console.log({ value, name });
-      const { name: optionName = '', values = [] } =
-        value.options?.[optionIndex] || {};
-      console.log({ optionName, values });
-      // Revalidate if the field has any error before
-      if (name && objectPath.get(errors, name)) trigger(name);
-      // Add option value if there isn't any yet
-      const hasName =
-        name === `options.${optionIndex}.name` &&
-        optionName.length > 0 &&
-        values.length === 0;
-      const valueHasLabel =
-        name?.includes(`options.${optionIndex}.values.`) &&
-        values[values.length - 1]?.value !== '';
-      console.log({ hasName, valueHasLabel });
-      if (hasName || valueHasLabel)
-        append({ value: '' }, { shouldFocus: false });
-      // Remove input with empty value but not the last element
-      for (let i = values.length - 1; i >= 0; i--) {
-        if (values[i]?.value?.trim() === '' && i < values.length - 1) {
-          remove(i);
-          break;
-        }
+  const watchOptions = useWatch({ control, name: 'options' });
+  const handleWatchOptionsChange = useCallback(async () => {
+    // Set initial value, for handleCancel
+    if (typeof initialValue.current === 'undefined')
+      initialValue.current = cloneDeep(watchOptions[optionIndex]);
+    const { label, values = [] } = watchOptions[optionIndex];
+    // Revalidate if the field has any error before
+    if (objectPath.get(errors, 'options')) await trigger('options');
+    // Add option value if there isn't any yet
+    const hasName = label.length > 0 && values.length === 0;
+    const valueHasLabel = values[values.length - 1]?.value !== '';
+    if (hasName || valueHasLabel) append({ value: '' }, { shouldFocus: false });
+    // Remove input with empty value but not the last element
+    for (let i = values.length - 1; i >= 0; i--) {
+      if (values[i]?.value?.trim() === '' && i < values.length - 1) {
+        remove(i);
+        break;
       }
-    });
-    return () => subscription.unsubscribe();
-  }, [append, remove, watch, optionIndex, errors, trigger]);
+    }
+  }, [append, errors, optionIndex, remove, trigger, watchOptions]);
 
   useEffect(() => {
-    const initRender = async () => {
-      await trigger(`options.${optionIndex}`);
-      if (option.name && last(option.values)?.value !== '') {
-        append({ value: '' }, { shouldFocus: false });
-      }
-    };
-    initRender();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [append, optionIndex, trigger]);
+    handleWatchOptionsChange();
+  }, [handleWatchOptionsChange]);
 
   return (
     <div className="flex w-full flex-col gap-y-3">
       <div className="flex flex-col">
         <FormInputField<Product>
           register={register}
-          name={`options.${optionIndex}.name`}
+          name={`options.${optionIndex}.label`}
           placeholder="Option Name"
-          error={isDoneBefore ? errors.options?.[optionIndex]?.name : null}
+          error={isDoneBefore ? errors.options?.[optionIndex]?.label : null}
         />
       </div>
       {fields.length > 0 && (

@@ -6,14 +6,14 @@ export type OptionValue = {
 };
 
 export type Option = {
-  id: string;
-  name: string;
+  id: string | number;
+  label: string;
   values: OptionValue[];
-  isEditing: boolean;
+  isEditing?: boolean;
 };
 
 export type ProductVariant = {
-  id: string;
+  id: string | number;
   name: string;
   options: {
     label: string;
@@ -21,7 +21,7 @@ export type ProductVariant = {
   }[];
   price: number;
   quantity: number;
-  sku?: string;
+  sku: string;
 };
 
 const requiredError = '請填寫此欄位';
@@ -54,8 +54,8 @@ export const productSchema = z.object({
   imageUrls: z.array(z.string()).optional(),
   options: z.array(
     z.object({
-      id: z.string().min(1, requiredError),
-      name: z.string().min(1, requiredError),
+      id: z.string().min(1, requiredError).or(z.number()),
+      label: z.string().min(1, requiredError),
       values: z
         .array(
           z.object({
@@ -89,7 +89,7 @@ export const productSchema = z.object({
   ),
   variants: z.array(
     z.object({
-      id: z.string().min(1, requiredError),
+      id: z.string().min(1, requiredError).or(z.number()),
       name: z.string().min(1, requiredError),
       price: z
         .number({ invalid_type_error: '請輸入數值' })
@@ -103,7 +103,7 @@ export const productSchema = z.object({
           value: z.string().min(1, requiredError),
         }),
       ),
-      sku: z.string().optional(),
+      sku: z.string(),
     }),
   ),
 });

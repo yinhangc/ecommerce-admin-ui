@@ -3,51 +3,97 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CartesianProduct } from 'js-combinatorics';
-import { cloneDeep } from 'lodash';
-import filter from 'lodash/filter';
+import { cloneDeep, find } from 'lodash';
 import findIndex from 'lodash/findIndex';
 import { useCallback, useEffect } from 'react';
-import { useForm, useFormContext } from 'react-hook-form';
+import { useForm, useFormContext, useWatch } from 'react-hook-form';
 import {
   HaveProductOptions,
   Option,
   Product,
   haveProductOptionsSchema,
 } from '../types';
-import { ProductOptionDisplay } from './ProductOptionDisplay';
-import { ProductOptionInput } from './ProductOptionInput';
-import { ProductVariantCombos } from './ProductVariantCombos';
+import { ProductOptionsDisplay } from './ProductOptionsDisplay';
+import { ProductOptionsInput } from './ProductOptionsInput';
+import { ProductVariantCombosInput } from './ProductVariantCombosInput';
 
-export const ProductVariants = () => {
+type ProductVariantsProps = {
+  existingData?: Product;
+};
+
+export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
+  const { existingData } = props;
   const {
+    control,
     register,
     setValue,
     getValues,
     formState: { errors },
-    watch,
   } = useFormContext<Product>();
   const {
+    reset: resetHaveProductOptions,
     register: registerHaveProductOptions,
-    watch: watchHaveProductOptions,
+    control: controlHaveProductOptions,
   } = useForm<HaveProductOptions>({
     resolver: zodResolver(haveProductOptionsSchema),
     defaultValues: {
       haveProductOptions: 'false',
     },
   });
-  const options = watch('options');
-  const haveProductOptions =
-    watchHaveProductOptions('haveProductOptions') === 'true';
+  const watchOptions = useWatch({
+    control,
+    name: 'options',
+  });
+  const watchHaveProductOptions = useWatch({
+    control: controlHaveProductOptions,
+    name: 'haveProductOptions',
+  });
+  const haveProductOptions = watchHaveProductOptions === 'true';
+
+  const updateOptionsAndVariants = useCallback(
+    (options: Option[]) => {
+      setValue('options', options);
+      if (find(options, { isEditing: true })) return;
+      // console.log('updateOptionsAndVariants', options, getValues('variants'));
+      const productVariants = [];
+      const groups: { [group: string]: string[] } = {};
+      for (const option of options) {
+        groups[option.label] = [];
+        for (const { value } of option.values) groups[option.label].push(value);
+      }
+      const combinations = new CartesianProduct(
+        ...Object.values(groups),
+      ).toArray();
+      for (const combo of combinations) {
+        const name = combo.join(' / ');
+        if (combo.join('').trim() === '') continue;
+        const isVariantExist = find(getValues('variants'), { name });
+        productVariants.push({
+          id: Math.random().toString(36).substr(2, 5),
+          name,
+          options: combo.map((value, i) => ({
+            label: Object.keys(groups)[i],
+            value,
+          })),
+          price: isVariantExist?.price || 1,
+          quantity: isVariantExist?.quantity || 0,
+          sku: isVariantExist?.sku || '',
+        });
+      }
+      setValue('variants', productVariants);
+    },
+    [getValues, setValue],
+  );
 
   const handleAddOption = () => {
     const options = cloneDeep(getValues('options'));
     options.push({
       id: Math.random().toString(36).substr(2, 5),
-      name: '',
+      label: '',
       values: [],
       isEditing: true,
     });
-    setValue('options', options);
+    updateOptionsAndVariants(options);
   };
 
   const handleUpdateOption = useCallback(
@@ -55,73 +101,61 @@ export const ProductVariants = () => {
       const options = cloneDeep(getValues('options'));
       const index = findIndex(options, { id: option.id });
       if (index !== -1) options[index] = option;
-      setValue('options', options);
+      updateOptionsAndVariants(options);
     },
-    [getValues, setValue],
+    [getValues, updateOptionsAndVariants],
   );
 
   const handleRemoveOption = useCallback(
-    (id: string) => {
+    (id: string | number) => {
       const options = cloneDeep(getValues('options'));
       const index = findIndex(options, { id });
       if (index !== -1) options.splice(index, 1);
-      setValue('options', options);
+      updateOptionsAndVariants(options);
     },
-    [getValues, setValue],
+    [getValues, updateOptionsAndVariants],
   );
 
   useEffect(() => {
-    const groups: { [group: string]: string[] } = {};
-    for (const option of filter(options, { isEditing: false })) {
-      groups[option.name] = [];
-      for (const { value } of option.values) groups[option.name].push(value);
-    }
-    const combinations = new CartesianProduct(
-      ...Object.values(groups),
-    ).toArray();
-    const productVariants = [];
-    for (const combo of combinations) {
-      const name = combo.join(' / ');
-      if (combo.join('').trim() === '') continue;
-      productVariants.push({
-        id: Math.random().toString(36).substr(2, 5),
-        name,
-        options: combo.map((value, i) => ({
-          label: Object.keys(groups)[i],
-          value,
-        })),
-        price: 1,
-        quantity: 0,
-        sku: '',
-      });
-    }
-    setValue('variants', productVariants);
-  }, [options, setValue]);
-
-  useEffect(() => {
-    const defaultVariantIfNoProductOptions = {
-      id: Math.random().toString(36).substr(2, 5),
-      name: 'default',
-      options: [],
-      price: 1,
-      quantity: 0,
-      sku: '',
-    };
-    if (!haveProductOptions)
-      setValue('variants', [defaultVariantIfNoProductOptions]);
-    const subscription = watchHaveProductOptions((value, { name, type }) => {
-      if (name !== 'haveProductOptions') return;
+    if (watchHaveProductOptions === 'false') {
       setValue('options', []);
       setValue(
         'variants',
-        value.haveProductOptions === 'false'
-          ? [defaultVariantIfNoProductOptions]
-          : [],
+        existingData && existingData.options.length === 0
+          ? [existingData.variants[0]]
+          : [
+              {
+                id: 'DEFAULT',
+                name: 'DEFAULT',
+                options: [],
+                price: 1,
+                quantity: 0,
+                sku: '',
+              },
+            ],
       );
+    } else {
+      const haveNoExistingDataVariants =
+        !existingData || existingData?.options?.length === 0;
+      setValue(
+        'options',
+        haveNoExistingDataVariants ? [] : existingData.options,
+      );
+      setValue(
+        'variants',
+        haveNoExistingDataVariants ? [] : existingData.variants,
+      );
+    }
+  }, [setValue, existingData, watchHaveProductOptions]);
+
+  useEffect(() => {
+    resetHaveProductOptions({
+      haveProductOptions:
+        existingData?.options && existingData.options.length > 0
+          ? 'true'
+          : 'false',
     });
-    return () => subscription.unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setValue, watchHaveProductOptions]);
+  }, [existingData, resetHaveProductOptions]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -135,11 +169,11 @@ export const ProductVariants = () => {
       />
       {haveProductOptions && (
         <>
-          {options.length > 0 && (
+          {watchOptions.length > 0 && (
             <div className="flex flex-col gap-y-6">
-              {options.map((option, index) =>
+              {watchOptions.map((option, index) =>
                 option.isEditing ? (
-                  <ProductOptionInput
+                  <ProductOptionsInput
                     key={option.id}
                     option={option}
                     optionIndex={index}
@@ -147,11 +181,11 @@ export const ProductVariants = () => {
                     handleRemoveOption={handleRemoveOption}
                   />
                 ) : (
-                  <ProductOptionDisplay
+                  <ProductOptionsDisplay
                     key={option.id}
                     option={option}
                     handleUpdateOption={handleUpdateOption}
-                  ></ProductOptionDisplay>
+                  ></ProductOptionsDisplay>
                 ),
               )}
             </div>
@@ -164,7 +198,7 @@ export const ProductVariants = () => {
             <FontAwesomeIcon icon={faPlus} className="mr-1" />
             增加選項
           </button>
-          <ProductVariantCombos />
+          <ProductVariantCombosInput />
         </>
       )}
       {!haveProductOptions && (

@@ -205,7 +205,7 @@ export const ListProducts = () => {
             onChange={(e) => column.setFilterValue(e.target.value)}
             value={columnFilterValue as string | number}
           >
-            {options?.map((option) => (
+            {options?.map((option, i) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -225,7 +225,7 @@ export const ListProducts = () => {
           return (
             <>
               <tr key={headerGroup.id} className="border-b">
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, i) => {
                   return (
                     <th key={header.id} className="px-6 py-3">
                       <div>
@@ -249,10 +249,10 @@ export const ListProducts = () => {
                   );
                 })}
               </tr>
-              <tr key={headerGroup.id + '-filter'} className="border-b">
+              <tr key={headerGroup.id + '-filter-row'} className="border-b">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <th key={header.id + '-filter'} className="px-6 py-3">
+                    <th key={header.id + '-filter-row'} className="px-6 py-3">
                       <div>{getHeaderFilter(header.column)}</div>
                     </th>
                   );

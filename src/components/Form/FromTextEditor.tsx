@@ -16,16 +16,19 @@ import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
 import { EditorProps } from '@tiptap/pm/view';
-import { EditorEvents, EditorProvider, useCurrentEditor } from '@tiptap/react';
+import { Editor, EditorContent, EditorEvents, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import clsx from 'clsx';
+import { useEffect } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 
-const EditorToolbar = () => {
-  const { editor } = useCurrentEditor();
-  if (!editor) {
-    return null;
-  }
+type EditorToolbarProps = {
+  editor: Editor | null;
+};
+const EditorToolbar = (props: EditorToolbarProps) => {
+  const { editor } = props;
+  if (!editor) return null;
+
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border border-b-0 px-4 py-2 text-lg">
       <div
@@ -273,24 +276,32 @@ const editorProps: EditorProps = {
 
 type FromTextEditorProps = {
   onChange: ControllerRenderProps['onChange'];
+  value: string;
 };
 
 export const FromTextEditor: React.FC<FromTextEditorProps> = (props) => {
-  const { onChange } = props;
+  const { onChange, value } = props;
 
   const handleUpdate = ({ editor }: EditorEvents['update']) => {
     if (editor.getText().trim() === '') onChange('');
     else onChange(editor.getHTML());
   };
 
+  const editor = useEditor({
+    extensions,
+    editorProps,
+    onUpdate: handleUpdate,
+  });
+
+  useEffect(() => {
+    if (!editor || !value || value === editor.getHTML()) return;
+    editor.commands.setContent(value);
+  }, [editor, value]);
+
   return (
-    <EditorProvider
-      slotBefore={<EditorToolbar />}
-      extensions={extensions}
-      editorProps={editorProps}
-      onUpdate={handleUpdate}
-    >
-      <></>
-    </EditorProvider>
+    <>
+      <EditorToolbar editor={editor} />
+      <EditorContent editor={editor} />
+    </>
   );
 };

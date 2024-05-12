@@ -1,15 +1,19 @@
 import { FormInputField } from '@/components/Form';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { Product } from '../types';
 
-export const ProductVariantCombos = () => {
+export const ProductVariantCombosInput = () => {
   const {
     register,
-    watch,
+    control,
     formState: { errors },
   } = useFormContext<Product>();
 
-  const variants = watch('variants', []);
+  const watchVariants = useWatch({
+    control,
+    name: 'variants',
+  });
+  // console.log('watchVariants', watchVariants);
 
   return (
     <div className="overflow-x-scroll rounded-md border">
@@ -23,7 +27,7 @@ export const ProductVariantCombos = () => {
           </tr>
         </thead>
         <tbody>
-          {variants?.map(({ id, name }, index) => (
+          {watchVariants?.map(({ id, name }, index) => (
             <tr key={id} className="border-b border-neutral-200">
               <td className="px-4 py-2">{name}</td>
               <td className="px-4 py-2">

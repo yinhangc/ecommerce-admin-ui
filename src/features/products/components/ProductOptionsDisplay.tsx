@@ -1,11 +1,11 @@
 import { Option } from '../types';
 
-type ProductOptionInputProps = {
+type ProductOptionsInputProps = {
   option: Option;
   handleUpdateOption: (option: Option) => void;
 };
 
-export const ProductOptionDisplay: React.FC<ProductOptionInputProps> = (
+export const ProductOptionsDisplay: React.FC<ProductOptionsInputProps> = (
   props,
 ) => {
   const { option, handleUpdateOption } = props;
@@ -15,7 +15,7 @@ export const ProductOptionDisplay: React.FC<ProductOptionInputProps> = (
   return (
     <div className="flex items-center">
       <div>
-        <h4 className="mb-1 font-bold">{option.name}</h4>
+        <h4 className="mb-1 font-bold">{option.label}</h4>
         <div className="flex flex-wrap gap-x-1">
           {option.values.map(({ value }, i) => (
             <div
