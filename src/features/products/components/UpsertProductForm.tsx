@@ -1,22 +1,26 @@
 import {
+  FormDropdown,
+  FormInputField,
+  FromTextEditor,
+} from '@/components/Form';
+import { FormImageUpload } from '@/components/Form/FormImageUpload';
+import { useUploadFilesMutation } from '@/features/blobs/api/blobs';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import {
   Controller,
   FormProvider,
   SubmitHandler,
   UseFormReturn,
   useForm,
 } from 'react-hook-form';
-import { Product, productSchema } from '../types';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCreateProductMutation } from '../api/products';
-import { useUploadFilesMutation } from '@/features/blobs/api/blobs';
 import {
-  FormDropdown,
-  FormInputField,
-  FromTextEditor,
-} from '@/components/Form';
-import { FormImageUpload } from '@/components/Form/FormImageUpload';
+  useCreateProductMutation,
+  useUpdateProductMutation,
+} from '../api/products';
+import { Product, productSchema } from '../types';
 import { ProductVariants } from './ProductVariants';
-import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type UpsertProductFormProps = {
   existingData?: Product;
@@ -24,10 +28,13 @@ type UpsertProductFormProps = {
 
 export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
   const { existingData } = props;
-  // console.log('existingData', existingData);
+  console.log('existingData', existingData);
+  const navigate = useNavigate();
 
   const [createProduct, { isLoading: isCreateProductLoading }] =
     useCreateProductMutation();
+  const [updateProduct, { isLoading: isUpdateProductLoading }] =
+    useUpdateProductMutation();
   const [uploadFiles, { isLoading: isUploadFilesLoading }] =
     useUploadFilesMutation();
 
@@ -54,17 +61,25 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
   const onSubmit: SubmitHandler<Product> = async (data) => {
     console.log('onSubmit', data);
     // return;
-    let uploadImagesRes: string[] = [];
-    if (data.images.length > 0) {
-      const formData = new FormData();
-      for (const image of data.images) formData.append('image', image);
-      uploadImagesRes = await uploadFiles(formData).unwrap();
-      console.log('uploadImagesRes', uploadImagesRes);
+    if (existingData) {
+      // TODO: Images upload and delete
+      await updateProduct({ ...data });
+      alert('您已成功更新產品！');
+    } else {
+      let uploadImagesRes: string[] = [];
+      if (data.images.length > 0) {
+        const formData = new FormData();
+        for (const image of data.images) formData.append('image', image);
+        uploadImagesRes = await uploadFiles(formData).unwrap();
+        console.log('uploadImagesRes', uploadImagesRes);
+      }
+      await createProduct({
+        ...data,
+        imageUrls: uploadImagesRes,
+      });
+      alert('您已成功創建產品！');
+      navigate('/products/list');
     }
-    await createProduct({
-      ...data,
-      imageUrls: uploadImagesRes,
-    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
@@ -74,6 +89,9 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
   useEffect(() => {
     if (existingData) reset(existingData);
   }, [existingData, reset]);
+
+  if (isCreateProductLoading || isUpdateProductLoading || isUploadFilesLoading)
+    return <div>Loading...</div>;
 
   return (
     <FormProvider {...methods}>

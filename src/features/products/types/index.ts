@@ -32,6 +32,7 @@ export const haveProductOptionsSchema = z.object({
 export type HaveProductOptions = z.infer<typeof haveProductOptionsSchema>;
 
 export const productSchema = z.object({
+  id: z.number().optional(),
   name: z.string().min(1, requiredError),
   description: z.string(),
   status: z.string().refine((value) => ['ACTIVE', 'INACTIVE'].includes(value), {

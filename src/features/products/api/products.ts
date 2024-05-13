@@ -7,7 +7,7 @@ export const productsApi = createApi({
     baseUrl: `http://127.0.0.1:8888/v1/api/products`,
   }),
   endpoints: (builder) => ({
-    createProduct: builder.mutation<Product, Partial<Product>>({
+    createProduct: builder.mutation<Product, Product>({
       query: (body) => ({
         url: '',
         method: 'POST',
@@ -31,6 +31,13 @@ export const productsApi = createApi({
         return response;
       },
     }),
+    updateProduct: builder.mutation<Product, Product & Pick<Product, 'id'>>({
+      query: ({ id, ...body }) => ({
+        url: `/${id}`,
+        method: 'PUT',
+        body,
+      }),
+    }),
   }),
 });
 
@@ -38,4 +45,5 @@ export const {
   useCreateProductMutation,
   useListProductMutation,
   useGetProductQuery,
+  useUpdateProductMutation,
 } = productsApi;

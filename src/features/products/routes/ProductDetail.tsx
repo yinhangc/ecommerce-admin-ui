@@ -8,7 +8,9 @@ import { UpsertProductForm } from '../components/UpsertProductForm';
 export const ProductDetail = () => {
   const { id: productId } = useParams();
   const navigate = useNavigate();
-  const { data } = useGetProductQuery(productId as string);
+  const { data, isLoading } = useGetProductQuery(productId as string);
+
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <NavigationLayout>
