@@ -63,7 +63,7 @@ export const NavigationLayout = ({ children }: NavigationLayoutProps) => {
           </li>
         </ul>
       </div>
-      <section className="h-full w-full flex-1 overflow-y-auto bg-gray-100 px-8 py-4">
+      <section className="relative h-full w-full flex-1 overflow-y-auto bg-gray-100 px-8 py-4">
         {children}
       </section>
     </aside>

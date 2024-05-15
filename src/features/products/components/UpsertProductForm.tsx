@@ -21,6 +21,7 @@ import {
 import { Product, productSchema } from '../types';
 import { ProductVariants } from './ProductVariants';
 import { useNavigate } from 'react-router-dom';
+import { Loader } from '@/components/Ui/Loader';
 
 type UpsertProductFormProps = {
   existingData?: Product;
@@ -61,6 +62,11 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
   const onSubmit: SubmitHandler<Product> = async (data) => {
     console.log('onSubmit', data);
     // return;
+    /* 
+      1) create / update the product
+      2) call uploadFile with productId, and confirm access level
+      Note: Upload file via /products/{id}/upload and remove /blobs api
+    */
     if (existingData) {
       // TODO: Images upload and delete
       await updateProduct({ ...data });
@@ -91,7 +97,11 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
   }, [existingData, reset]);
 
   if (isCreateProductLoading || isUpdateProductLoading || isUploadFilesLoading)
-    return <div>Loading...</div>;
+    return (
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <Loader size="large" />
+      </div>
+    );
 
   return (
     <FormProvider {...methods}>
