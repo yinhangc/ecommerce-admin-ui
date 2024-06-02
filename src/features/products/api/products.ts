@@ -7,11 +7,11 @@ export const productsApi = createApi({
     baseUrl: `http://127.0.0.1:8888/v1/api/products`,
   }),
   endpoints: (builder) => ({
-    createProduct: builder.mutation<Product, Product>({
-      query: (body) => ({
+    createProduct: builder.mutation<Product, FormData>({
+      query: (formData) => ({
         url: '',
         method: 'POST',
-        body,
+        body: formData,
       }),
     }),
     listProduct: builder.mutation<
@@ -31,11 +31,11 @@ export const productsApi = createApi({
         return response;
       },
     }),
-    updateProduct: builder.mutation<Product, Product & Pick<Product, 'id'>>({
-      query: ({ id, ...body }) => ({
-        url: `/${id}`,
+    updateProduct: builder.mutation<Product, FormData>({
+      query: (formData) => ({
+        url: `/${formData.get('id')}`,
         method: 'PUT',
-        body,
+        body: formData,
       }),
     }),
   }),

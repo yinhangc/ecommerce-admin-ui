@@ -4,7 +4,7 @@ import {
   FromTextEditor,
 } from '@/components/Form';
 import { FormImageUpload } from '@/components/Form/FormImageUpload';
-import { useUploadFilesMutation } from '@/features/blobs/api/blobs';
+import { Loader } from '@/components/Ui/Loader';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import {
@@ -14,14 +14,13 @@ import {
   UseFormReturn,
   useForm,
 } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from '../api/products';
 import { Product, productSchema } from '../types';
 import { ProductVariants } from './ProductVariants';
-import { useNavigate } from 'react-router-dom';
-import { Loader } from '@/components/Ui/Loader';
 
 type UpsertProductFormProps = {
   existingData?: Product;
@@ -36,8 +35,6 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
     useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdateProductLoading }] =
     useUpdateProductMutation();
-  const [uploadFiles, { isLoading: isUploadFilesLoading }] =
-    useUploadFilesMutation();
 
   const methods: UseFormReturn<Product> = useForm<Product>({
     resolver: zodResolver(productSchema),
@@ -46,6 +43,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
       description: '',
       status: 'INACTIVE',
       images: [],
+      imageUrls: [],
       options: [],
       variants: [],
     },
@@ -59,33 +57,28 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
   } = methods;
   // console.log('ERRORS!', errors, getValues());
 
-  const onSubmit: SubmitHandler<Product> = async (data) => {
+  const onSubmit: SubmitHandler<Product> = async (data: any) => {
     console.log('onSubmit', data);
-    // return;
-    /* 
-      1) create / update the product
-      2) call uploadFile with productId, and confirm access level
-      Note: Upload file via /products/{id}/upload and remove /blobs api
-    */
+    const formData = new FormData();
+    // append product image files
+    if (data.images.length > 0) {
+      for (const image of data.images) formData.append('file', image);
+    }
+    // append other product data
+    Object.keys(data).forEach((key: string) => {
+      formData.append(
+        key,
+        typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key],
+      );
+    });
     if (existingData) {
-      // TODO: Images upload and delete
-      await updateProduct({ ...data });
+      await updateProduct(formData);
       alert('您已成功更新產品！');
     } else {
-      let uploadImagesRes: string[] = [];
-      if (data.images.length > 0) {
-        const formData = new FormData();
-        for (const image of data.images) formData.append('image', image);
-        uploadImagesRes = await uploadFiles(formData).unwrap();
-        console.log('uploadImagesRes', uploadImagesRes);
-      }
-      await createProduct({
-        ...data,
-        imageUrls: uploadImagesRes,
-      });
+      await createProduct(formData).unwrap();
       alert('您已成功創建產品！');
-      navigate('/products/list');
     }
+    navigate('/products/list');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
@@ -96,7 +89,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
     if (existingData) reset(existingData);
   }, [existingData, reset]);
 
-  if (isCreateProductLoading || isUpdateProductLoading || isUploadFilesLoading)
+  if (isCreateProductLoading || isUpdateProductLoading)
     return (
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <Loader size="large" />

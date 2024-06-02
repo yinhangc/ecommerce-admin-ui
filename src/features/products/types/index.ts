@@ -38,21 +38,18 @@ export const productSchema = z.object({
   status: z.string().refine((value) => ['ACTIVE', 'INACTIVE'].includes(value), {
     message: '無效的數值',
   }),
-  images: z
-    .any()
-    .refine(
-      (value) => {
-        for (const im of value) {
-          if (!(im instanceof File)) return false;
-        }
-        return true;
-      },
-      {
-        message: '上載的照片格式不符',
-      },
-    )
-    .optional(),
-  imageUrls: z.array(z.string()).optional(),
+  images: z.any().refine(
+    (value) => {
+      for (const im of value) {
+        if (!(im instanceof File)) return false;
+      }
+      return true;
+    },
+    {
+      message: '上載的照片格式不符',
+    },
+  ),
+  imageUrls: z.array(z.string()),
   options: z.array(
     z.object({
       id: z.string().min(1, requiredError).or(z.number()),
