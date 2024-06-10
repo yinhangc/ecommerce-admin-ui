@@ -4,10 +4,10 @@ import React, { ChangeEvent, useEffect, useState } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 
 type ImageUploadButtonProps = {
-  handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleUpload: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 const ImageUploadButton: React.FC<ImageUploadButtonProps> = (props) => {
-  const { handleChange } = props;
+  const { handleUpload } = props;
 
   return (
     <>
@@ -23,7 +23,7 @@ const ImageUploadButton: React.FC<ImageUploadButtonProps> = (props) => {
         type="file"
         className="hidden"
         accept="image/*"
-        onChange={handleChange}
+        onChange={handleUpload}
       />
     </>
   );
@@ -31,34 +31,35 @@ const ImageUploadButton: React.FC<ImageUploadButtonProps> = (props) => {
 
 type FormImageUpload = {
   onChange: ControllerRenderProps['onChange'];
+  value: (string | Blob)[];
 };
 export const FormImageUpload: React.FC<FormImageUpload> = (props) => {
-  const { onChange } = props;
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const { onChange, value } = props;
+  console.log('FormImageUpload value', value);
+  // const [uploadedImages, setUploadedImages] = useState<(string | Blob)[]>([]);
   const [previewImageUrls, setPreviewImageUrls] = useState<string[]>([]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (!files?.length) return;
-    setUploadedImages([...uploadedImages, ...files]);
+    onChange([...value, ...files]);
   };
 
   const handleRemove = (index: number) => {
-    setUploadedImages(uploadedImages.filter((_, i) => index !== i));
+    onChange(value.filter((_, i) => index !== i));
   };
 
   useEffect(() => {
-    const objectUrls = Array.from(uploadedImages).map((f) =>
-      URL.createObjectURL(f),
+    const objectUrls = Array.from(value).map((f: string | Blob) =>
+      f instanceof Blob ? URL.createObjectURL(f) : f,
     );
     setPreviewImageUrls(objectUrls);
-    onChange(uploadedImages);
-  }, [onChange, uploadedImages]);
+  }, [onChange, value]);
 
   return (
     <div className="w-full rounded border p-4 text-center">
       {previewImageUrls.length === 0 && (
-        <ImageUploadButton handleChange={handleChange} />
+        <ImageUploadButton handleUpload={handleUpload} />
       )}
       {previewImageUrls.length > 0 && (
         <>
@@ -77,7 +78,7 @@ export const FormImageUpload: React.FC<FormImageUpload> = (props) => {
               </div>
             ))}
           </div>
-          <ImageUploadButton handleChange={handleChange} />
+          <ImageUploadButton handleUpload={handleUpload} />
         </>
       )}
     </div>

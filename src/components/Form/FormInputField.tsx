@@ -1,3 +1,4 @@
+import { InputHTMLAttributes } from 'react';
 import {
   FieldError,
   FieldPath,
@@ -31,6 +32,13 @@ export const FormInputField = <T extends FieldValues>(
     classes,
   } = props;
 
+  // control html input behavior
+  const inputAttributes: InputHTMLAttributes<HTMLInputElement> = {};
+  if (typeof registerOptions?.min === 'number')
+    inputAttributes.min = registerOptions.min;
+  if (typeof registerOptions?.max === 'number')
+    inputAttributes.max = registerOptions.max;
+
   return (
     <div className={`flex w-full flex-col gap-y-1 ${!!classes && classes}`}>
       {!!label && (
@@ -45,6 +53,7 @@ export const FormInputField = <T extends FieldValues>(
         placeholder={placeholder}
         className="rounded border border-gray-400 px-4 py-2"
         type={type}
+        {...inputAttributes}
         {...register(name, registerOptions)}
       />
       {!!error && <p className="text-sm text-red-600">{error.message}</p>}

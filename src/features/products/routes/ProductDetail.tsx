@@ -9,7 +9,7 @@ import { Loader } from '@/components/Ui/Loader';
 export const ProductDetail = () => {
   const { id: productId } = useParams();
   const navigate = useNavigate();
-  const { data, isLoading } = useGetProductQuery(productId as string);
+  const { data, isLoading, refetch } = useGetProductQuery(productId as string);
 
   return (
     <NavigationLayout>
@@ -26,7 +26,7 @@ export const ProductDetail = () => {
             </button>
             <h2 className="text-2xl font-medium">產品詳情 #{productId}</h2>
           </div>
-          <UpsertProductForm existingData={data} />
+          <UpsertProductForm existingData={data} loadData={refetch} />
         </>
       )}
     </NavigationLayout>

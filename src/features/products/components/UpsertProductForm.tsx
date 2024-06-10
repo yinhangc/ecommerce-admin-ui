@@ -6,6 +6,7 @@ import {
 import { FormImageUpload } from '@/components/Form/FormImageUpload';
 import { Loader } from '@/components/Ui/Loader';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { QueryActionCreatorResult } from '@reduxjs/toolkit/query';
 import { useEffect } from 'react';
 import {
   Controller,
@@ -14,7 +15,6 @@ import {
   UseFormReturn,
   useForm,
 } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
@@ -24,12 +24,12 @@ import { ProductVariants } from './ProductVariants';
 
 type UpsertProductFormProps = {
   existingData?: Product;
+  loadData?: (id: string) => QueryActionCreatorResult<any>;
 };
 
 export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
-  const { existingData } = props;
-  console.log('existingData', existingData);
-  const navigate = useNavigate();
+  const { existingData, loadData } = props;
+  // console.log('existingData', existingData);
 
   const [createProduct, { isLoading: isCreateProductLoading }] =
     useCreateProductMutation();
@@ -43,7 +43,6 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
       description: '',
       status: 'INACTIVE',
       images: [],
-      imageUrls: [],
       options: [],
       variants: [],
     },
@@ -52,33 +51,42 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
     reset,
     control,
     register,
+    getValues,
     handleSubmit,
     formState: { errors },
   } = methods;
   // console.log('ERRORS!', errors, getValues());
 
-  const onSubmit: SubmitHandler<Product> = async (data: any) => {
+  const onSubmit: SubmitHandler<Product> = async (data: Product) => {
     console.log('onSubmit', data);
     const formData = new FormData();
     // append product image files
-    if (data.images.length > 0) {
+    if (data.images.length > 0)
       for (const image of data.images) formData.append('file', image);
-    }
     // append other product data
     Object.keys(data).forEach((key: string) => {
+      const productKey = key as keyof Product;
       formData.append(
         key,
-        typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key],
+        typeof data[productKey] === 'object'
+          ? JSON.stringify(data[productKey])
+          : data[productKey],
       );
     });
-    if (existingData) {
-      await updateProduct(formData);
-      alert('您已成功更新產品！');
-    } else {
-      await createProduct(formData).unwrap();
-      alert('您已成功創建產品！');
+    try {
+      if (existingData) {
+        const product = await updateProduct(formData).unwrap();
+        alert('您已成功更新產品！');
+        if (loadData) loadData((product.id as number).toString());
+      } else {
+        await createProduct(formData).unwrap();
+        alert('您已成功創建產品！');
+        reset();
+      }
+    } catch (e) {
+      console.log('ERROR!', e);
+      alert('產品創建失敗');
     }
-    navigate('/products/list');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
@@ -133,8 +141,8 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
               <Controller
                 control={control}
                 name="images"
-                render={({ field: { onChange } }) => (
-                  <FormImageUpload onChange={onChange} />
+                render={({ field: { onChange, value } }) => (
+                  <FormImageUpload onChange={onChange} value={value} />
                 )}
               ></Controller>
             </div>

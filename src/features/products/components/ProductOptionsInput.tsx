@@ -53,17 +53,17 @@ export const ProductOptionsInput: React.FC<ProductOptionsInputProps> = (
 
   const watchOptions = useWatch({ control, name: 'options' });
   const handleWatchOptionsChange = useCallback(async () => {
-    // Set initial value, for handleCancel
+    // set initial value, for handleCancel
     if (typeof initialValue.current === 'undefined')
       initialValue.current = cloneDeep(watchOptions[optionIndex]);
     const { label, values = [] } = watchOptions[optionIndex];
-    // Revalidate if the field has any error before
+    // revalidate if the field has any error before
     if (objectPath.get(errors, 'options')) await trigger('options');
-    // Add option value if there isn't any yet
+    // add option value if there isn't any yet
     const hasName = label.length > 0 && values.length === 0;
     const valueHasLabel = values[values.length - 1]?.value !== '';
     if (hasName || valueHasLabel) append({ value: '' }, { shouldFocus: false });
-    // Remove input with empty value but not the last element
+    // remove input with empty value but not the last element
     for (let i = values.length - 1; i >= 0; i--) {
       if (values[i]?.value?.trim() === '' && i < values.length - 1) {
         remove(i);

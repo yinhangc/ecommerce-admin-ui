@@ -41,7 +41,7 @@ export const productSchema = z.object({
   images: z.any().refine(
     (value) => {
       for (const im of value) {
-        if (!(im instanceof File)) return false;
+        if (!(im instanceof File || typeof im === 'string')) return false;
       }
       return true;
     },
@@ -49,7 +49,7 @@ export const productSchema = z.object({
       message: '上載的照片格式不符',
     },
   ),
-  imageUrls: z.array(z.string()),
+  // imageUrls: z.array(z.string()),
   options: z.array(
     z.object({
       id: z.string().min(1, requiredError).or(z.number()),
@@ -91,10 +91,12 @@ export const productSchema = z.object({
       name: z.string().min(1, requiredError),
       price: z
         .number({ invalid_type_error: '請輸入數值' })
-        .min(1, '數值不能少過1'),
+        .min(1, '數值不能少過1')
+        .max(9999, '數值不能大過9999'),
       quantity: z
         .number({ invalid_type_error: '請輸入數值' })
-        .min(0, '數值不能少過0'),
+        .min(0, '數值不能少過0')
+        .max(9999, '數值不能大過9999'),
       options: z.array(
         z.object({
           label: z.string().min(1, requiredError),

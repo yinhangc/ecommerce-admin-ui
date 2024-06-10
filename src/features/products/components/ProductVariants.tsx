@@ -116,6 +116,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
     [getValues, updateOptionsAndVariants],
   );
 
+  // subscribe to haveProductOptions change
   useEffect(() => {
     if (watchHaveProductOptions === 'false') {
       setValue('options', []);
@@ -148,6 +149,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
     }
   }, [setValue, existingData, watchHaveProductOptions]);
 
+  // set default haveProductOptions on init
   useEffect(() => {
     resetHaveProductOptions({
       haveProductOptions:
@@ -207,7 +209,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
             register={register}
             name={`variants.0.price`}
             label="價錢"
-            registerOptions={{ min: 1, valueAsNumber: true }}
+            registerOptions={{ min: 1, max: 9999, valueAsNumber: true }}
             type="number"
             placeholder="Price"
             classes="w-[150px] py-1 px-2"
@@ -217,11 +219,11 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
             register={register}
             name={`variants.0.quantity`}
             label="數量"
-            registerOptions={{ min: 1, valueAsNumber: true }}
+            registerOptions={{ min: 0, max: 9999, valueAsNumber: true }}
             type="number"
             placeholder="Quantity"
             classes="w-[150px] py-1 px-2"
-            error={errors?.variants?.[0]?.price}
+            error={errors?.variants?.[0]?.quantity}
           />
           <FormInputField<Product>
             register={register}
@@ -229,7 +231,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
             label="SKU"
             placeholder="SKU"
             classes="w-[150px] py-1 px-2"
-            error={errors?.variants?.[0]?.price}
+            error={errors?.variants?.[0]?.sku}
           />
         </div>
       )}

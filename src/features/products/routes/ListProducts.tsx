@@ -155,16 +155,14 @@ export const ListProducts = () => {
       const orderBy: ListProductPayload['orderBy'] = [];
       for (const { id, desc } of sorting)
         orderBy.push({ [id]: desc ? 'desc' : 'asc' });
-      console.log('(loadData) FILTER!', filter);
-      console.log('(loadData) ORDERBY!', orderBy);
-      const res = await memoizedListProduct({
+      const response = await memoizedListProduct({
         skip: pagination.pageSize * pagination.pageIndex,
         take: pagination.pageSize,
         filter,
         orderBy,
       }).unwrap();
-      console.log('(loadData) List Product RES', res);
-      setData(res);
+      console.log('(loadData) List Product RES', response);
+      setData(response);
     }, 1200),
     [
       columnFilters,
