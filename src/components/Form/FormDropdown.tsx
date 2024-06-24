@@ -1,19 +1,21 @@
 import React from 'react';
-import { UseFormRegister } from 'react-hook-form';
+import { FieldPath, FieldValues, UseFormRegister } from 'react-hook-form';
 
-type FormDropdownProps = {
-  name: string;
+type FormDropdownProps<T extends FieldValues> = {
+  name: FieldPath<T>;
   label?: string;
   options: {
     label: string;
     value: string;
   }[];
   required?: boolean;
-  register: UseFormRegister<any>;
+  register: UseFormRegister<T>;
   classes?: string;
 };
 
-export const FormDropdown: React.FC<FormDropdownProps> = (props) => {
+export const FormDropdown = <T extends FieldValues>(
+  props: FormDropdownProps<T>,
+) => {
   const { name, label, options, required = false, register, classes } = props;
 
   return (

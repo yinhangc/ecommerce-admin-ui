@@ -1,4 +1,4 @@
-import { Option } from '../types';
+import { Option } from '../types/addProduct';
 
 type ProductOptionsInputProps = {
   option: Option;

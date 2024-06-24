@@ -19,7 +19,7 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from '../api/products';
-import { Product, productSchema } from '../types';
+import { Product, productSchema } from '../types/addProduct';
 import { ProductVariants } from './ProductVariants';
 
 type UpsertProductFormProps = {

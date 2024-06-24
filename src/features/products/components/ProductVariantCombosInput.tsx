@@ -1,6 +1,6 @@
 import { FormInputField } from '@/components/Form';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { Product } from '../types';
+import { Product } from '../types/addProduct';
 
 export const ProductVariantCombosInput = () => {
   const {
@@ -13,7 +13,6 @@ export const ProductVariantCombosInput = () => {
     control,
     name: 'variants',
   });
-  // console.log('watchVariants', watchVariants);
 
   return (
     <div className="overflow-x-scroll rounded-md border">

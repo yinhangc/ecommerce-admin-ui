@@ -1,6 +1,7 @@
 import { getBaseQuery } from '@/lib/rtk-query';
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { ListProductPayload, Product, ProductInList } from '../types';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { Product } from '../types/addProduct';
+import { ListProductPayload, ProductInList } from '../types/listProduct';
 
 export const productsApi = createApi({
   reducerPath: 'productsApi',

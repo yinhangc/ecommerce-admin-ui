@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// #region - AddProduct
 export type OptionValue = {
   value: string;
 };
@@ -12,25 +11,17 @@ export type Option = {
   isEditing?: boolean;
 };
 
-export type ProductVariant = {
-  id: string | number;
-  name: string;
-  options: {
-    label: string;
-    value: string;
-  }[];
-  price: number;
-  quantity: number;
-  sku: string;
-};
-
 const requiredError = '請填寫此欄位';
 
+// #region - have product options type
 export const haveProductOptionsSchema = z.object({
   haveProductOptions: z.enum(['true', 'false']),
 });
-export type HaveProductOptions = z.infer<typeof haveProductOptionsSchema>;
 
+export type HaveProductOptions = z.infer<typeof haveProductOptionsSchema>;
+// #endregion
+
+// #region - product type
 export const productSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(1, requiredError),
@@ -49,7 +40,6 @@ export const productSchema = z.object({
       message: '上載的照片格式不符',
     },
   ),
-  // imageUrls: z.array(z.string()),
   options: z.array(
     z.object({
       id: z.string().min(1, requiredError).or(z.number()),
@@ -107,26 +97,6 @@ export const productSchema = z.object({
     }),
   ),
 });
-export type Product = z.infer<typeof productSchema>;
-// #endregion
 
-// #region - ListProduct
-export type ListProductPayload = {
-  skip: number;
-  take: number;
-  filter: { [key: string]: string | number };
-  orderBy: { [key: string]: 'asc' | 'desc' }[];
-};
-export type ProductInList = {
-  id: number;
-  name: string;
-  description: string;
-  skus: {
-    sku: string;
-    price: number;
-  }[];
-  status: 'ACTIVE' | 'INACTIVE';
-  createdAt: string;
-  updatedAt: string;
-};
+export type Product = z.infer<typeof productSchema>;
 // #endregion

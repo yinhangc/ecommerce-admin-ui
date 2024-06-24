@@ -13,6 +13,7 @@ export const NavigationLayout = ({ children }: NavigationLayoutProps) => {
     <aside className="flex h-screen w-screen">
       <div className="h-full min-w-[200px] bg-slate-800 px-4 py-2 text-white">
         <ul className="flex flex-col gap-y-3">
+          {/* Products */}
           <li>
             <button className="inline-block w-full cursor-default rounded px-3 py-1 text-left">
               <FontAwesomeIcon icon={faTag} className="mr-2" />
@@ -45,8 +46,22 @@ export const NavigationLayout = ({ children }: NavigationLayoutProps) => {
                   創建產品
                 </NavLink>
               </li>
+              <li className="mt-1">
+                <NavLink
+                  to="/products/categories"
+                  className={({ isActive }) =>
+                    clsx(
+                      'ml-6 inline-block w-[calc(100%-24px)] rounded px-3 py-1',
+                      isActive && ' bg-white text-slate-800',
+                    )
+                  }
+                >
+                  管理分類
+                </NavLink>
+              </li>
             </ul>
           </li>
+          {/* Order */}
           <li>
             <NavLink
               to="/orders"

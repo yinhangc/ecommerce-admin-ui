@@ -20,7 +20,7 @@ import moment from 'moment';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useListProductMutation } from '../api/products';
-import { ListProductPayload, ProductInList } from '../types';
+import { ListProductPayload, ProductInList } from '../types/addProduct';
 
 export const ListProducts = () => {
   const [listProduct] = useListProductMutation();
@@ -43,7 +43,7 @@ export const ListProducts = () => {
       cell: (props) => (
         <button>
           <NavLink
-            to={`/products/list/${props.row.original.id}/details`}
+            to={`/products/list/${props.row.original.id}`}
             className="block h-full w-full"
           >
             <FontAwesomeIcon icon={faEye} />
