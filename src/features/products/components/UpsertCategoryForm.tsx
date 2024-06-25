@@ -59,10 +59,7 @@ export const UpsertCategoryForm = () => {
             返回
           </Link>
         </button>
-        <button
-          type="submit"
-          className="rounded bg-blue-600 px-4 py-2 text-white"
-        >
+        <button type="submit" className="bg-green rounded px-4 py-2 text-white">
           儲存
         </button>
       </div>

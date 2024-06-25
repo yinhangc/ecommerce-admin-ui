@@ -29,6 +29,7 @@ export const productSchema = z.object({
   status: z.string().refine((value) => ['ACTIVE', 'INACTIVE'].includes(value), {
     message: '無效的數值',
   }),
+  categoryId: z.string().transform(Number).optional(),
   images: z.any().refine(
     (value) => {
       for (const im of value) {

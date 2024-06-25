@@ -1,6 +1,6 @@
 import { FormInputField } from '@/components/Form';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { Product } from '../types/addProduct';
+import { Product } from '../types/upsertProduct';
 
 export const ProductVariantCombosInput = () => {
   const {

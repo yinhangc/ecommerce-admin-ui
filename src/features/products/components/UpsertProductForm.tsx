@@ -19,7 +19,7 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from '../api/products';
-import { Product, productSchema } from '../types/addProduct';
+import { Product, productSchema } from '../types/upsertProduct';
 import { ProductVariants } from './ProductVariants';
 
 type UpsertProductFormProps = {
@@ -154,13 +154,25 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
           <div className="col-span-4 flex flex-col gap-y-6">
             <div className="flex flex-col gap-y-4 rounded-md bg-white px-6 py-4 shadow-md">
               <h3 className="font-medium">狀態</h3>
-              <FormDropdown
+              <FormDropdown<Product>
                 name="status"
                 required={true}
                 register={register}
                 options={[
                   { label: 'Active', value: 'ACTIVE' },
                   { label: 'Inactive', value: 'INACTIVE' },
+                ]}
+                classes="flex-1"
+              />
+            </div>
+            <div className="flex flex-col gap-y-4 rounded-md bg-white px-6 py-4 shadow-md">
+              <h3 className="font-medium">分類</h3>
+              <FormDropdown<Product>
+                name="categoryId"
+                register={register}
+                options={[
+                  { label: 'Category 1', value: '1' },
+                  { label: 'Category 2', value: '2' },
                 ]}
                 classes="flex-1"
               />
@@ -173,7 +185,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
           </button>
           <button
             type="submit"
-            className="rounded bg-blue-600 px-4 py-2 text-white"
+            className="bg-green rounded px-4 py-2 text-white"
           >
             發佈
           </button>

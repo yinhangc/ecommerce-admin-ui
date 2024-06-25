@@ -11,7 +11,7 @@ type NavigationLayoutProps = {
 export const NavigationLayout = ({ children }: NavigationLayoutProps) => {
   return (
     <aside className="flex h-screen w-screen">
-      <div className="h-full min-w-[200px] bg-slate-800 px-4 py-2 text-white">
+      <div className="bg-navy h-full min-w-[200px] px-4 py-2 text-white">
         <ul className="flex flex-col gap-y-3">
           {/* Products */}
           <li>

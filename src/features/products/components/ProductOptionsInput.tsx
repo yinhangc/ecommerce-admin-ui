@@ -3,7 +3,7 @@ import { cloneDeep, find, last } from 'lodash';
 import objectPath from 'object-path';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
-import { Product, Option } from '../types/addProduct';
+import { Product, Option } from '../types/upsertProduct';
 
 type ProductOptionsInputProps = {
   option: Option;

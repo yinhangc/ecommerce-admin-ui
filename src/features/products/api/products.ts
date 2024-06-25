@@ -1,7 +1,7 @@
 import { getBaseQuery } from '@/lib/rtk-query';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { Product } from '../types/addProduct';
 import { ListProductPayload, ProductInList } from '../types/listProduct';
+import { Product } from '../types/upsertProduct';
 
 export const productsApi = createApi({
   reducerPath: 'productsApi',
@@ -26,6 +26,7 @@ export const productsApi = createApi({
     }),
     getProduct: builder.query<Product, string>({
       query: (id) => ({ url: `/${id}` }),
+      // TODO: remove isEditing here
       transformResponse: (response: Product, meta, arg) => {
         for (const option of response.options) option.isEditing = false;
         return response;

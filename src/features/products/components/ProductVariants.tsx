@@ -12,7 +12,7 @@ import {
   Option,
   Product,
   haveProductOptionsSchema,
-} from '../types/addProduct';
+} from '../types/upsertProduct';
 import { ProductOptionsDisplay } from './ProductOptionsDisplay';
 import { ProductOptionsInput } from './ProductOptionsInput';
 import { ProductVariantCombosInput } from './ProductVariantCombosInput';

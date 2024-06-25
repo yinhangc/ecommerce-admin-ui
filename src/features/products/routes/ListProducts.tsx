@@ -20,7 +20,7 @@ import moment from 'moment';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useListProductMutation } from '../api/products';
-import { ListProductPayload, ProductInList } from '../types/addProduct';
+import { ListProductPayload, ProductInList } from '../types/upsertProduct';
 
 export const ListProducts = () => {
   const [listProduct] = useListProductMutation();

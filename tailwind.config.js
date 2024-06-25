@@ -8,6 +8,11 @@ export default {
       fontWeight: {
         inherit: 'inherit',
       },
+      colors: {
+        navy: '#11224d',
+        green: '#00bca1',
+        orange: '#f98125',
+      },
       typography: () => ({
         DEFAULT: {
           css: {
