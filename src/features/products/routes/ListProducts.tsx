@@ -17,10 +17,10 @@ import {
 import { sentenceCase } from 'change-case';
 import { debounce } from 'lodash';
 import moment from 'moment';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useListProductMutation } from '../api/products';
-import { ListProductPayload, ProductInList } from '../types/upsertProduct';
+import { ListProductPayload, ProductInList } from '../types/listProduct';
 
 export const ListProducts = () => {
   const [listProduct] = useListProductMutation();
@@ -221,7 +221,7 @@ export const ListProducts = () => {
       <thead>
         {table.getHeaderGroups().map((headerGroup) => {
           return (
-            <>
+            <React.Fragment key={'header-group-' + headerGroup.id}>
               <tr key={headerGroup.id} className="border-b">
                 {headerGroup.headers.map((header, i) => {
                   return (
@@ -247,16 +247,16 @@ export const ListProducts = () => {
                   );
                 })}
               </tr>
-              <tr key={headerGroup.id + '-filter-row'} className="border-b">
+              <tr key={'filter-row-' + headerGroup.id} className="border-b">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <th key={header.id + '-filter-row'} className="px-6 py-3">
+                    <th key={'filter-row-' + header.id} className="px-6 py-3">
                       <div>{getHeaderFilter(header.column)}</div>
                     </th>
                   );
                 })}
               </tr>
-            </>
+            </React.Fragment>
           );
         })}
       </thead>
@@ -290,7 +290,7 @@ export const ListProducts = () => {
         <div className="flex items-center gap-4">
           <button
             disabled={currentPage === 1}
-            className="rounded-full border border-blue-600 px-2 py-1 text-blue-600 disabled:border-inherit disabled:text-gray-300"
+            className="border-blue text-blue rounded-full border px-2 py-1 disabled:border-inherit disabled:text-gray-300"
             onClick={() => table.getCanPreviousPage() && table.previousPage()}
           >
             <FontAwesomeIcon icon={faChevronLeft} className="h-4 w-4" />
@@ -309,7 +309,7 @@ export const ListProducts = () => {
           </div>
           <button
             disabled={currentPage === totalPage}
-            className="rounded-full border border-blue-600 px-2 py-1 text-blue-600 disabled:border-inherit disabled:text-gray-300"
+            className="border-blue text-blue rounded-full border px-2 py-1 disabled:border-inherit disabled:text-gray-300"
             onClick={() => table.getCanNextPage() && table.nextPage()}
           >
             <FontAwesomeIcon icon={faChevronRight} className="h-4 w-4" />

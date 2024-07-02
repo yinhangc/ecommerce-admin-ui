@@ -194,7 +194,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
           )}
           <button
             type="button"
-            className="rounded border border-blue-600 px-4 py-1 text-blue-600"
+            className="border-blue text-blue rounded border px-4 py-1"
             onClick={handleAddOption}
           >
             <FontAwesomeIcon icon={faPlus} className="mr-1" />

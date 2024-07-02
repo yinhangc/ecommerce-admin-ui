@@ -6,8 +6,7 @@ export const Loader: React.FC<LoaderProps> = (props) => {
   const { size = 'medium' } = props;
 
   const getClassName = () => {
-    let className =
-      'animate-spin fill-blue-600 text-gray-200 dark:text-gray-600';
+    let className = 'animate-spin fill-blue text-gray-200 dark:text-gray-600';
     switch (size) {
       case 'small':
         className += ' h-12 w-12';

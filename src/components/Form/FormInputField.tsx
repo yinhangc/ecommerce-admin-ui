@@ -16,6 +16,7 @@ type InputFieldProps<T extends FieldValues> = {
   registerOptions?: RegisterOptions;
   error?: FieldError | null;
   classes?: string;
+  prepend?: string;
 };
 
 export const FormInputField = <T extends FieldValues>(
@@ -30,6 +31,7 @@ export const FormInputField = <T extends FieldValues>(
     registerOptions,
     error,
     classes,
+    prepend,
   } = props;
 
   // control html input behavior
@@ -45,18 +47,25 @@ export const FormInputField = <T extends FieldValues>(
         <label htmlFor={name}>
           {label}
           {registerOptions?.required && (
-            <span className="ml-1 text-red-600">*</span>
+            <span className="text-red ml-1">*</span>
           )}
         </label>
       )}
-      <input
-        placeholder={placeholder}
-        className="rounded border border-gray-400 px-4 py-2"
-        type={type}
-        {...inputAttributes}
-        {...register(name, registerOptions)}
-      />
-      {!!error && <p className="text-sm text-red-600">{error.message}</p>}
+      <div className="flex items-center">
+        {prepend && (
+          <div className="mr-1 rounded border bg-gray-200 px-2 py-2">
+            <span>{prepend}</span>
+          </div>
+        )}
+        <input
+          placeholder={placeholder}
+          className="w-full rounded border border-gray-400 px-4 py-2"
+          type={type}
+          {...inputAttributes}
+          {...register(name, registerOptions)}
+        />
+      </div>
+      {!!error && <p className="text-red text-sm">{error.message}</p>}
     </div>
   );
 };

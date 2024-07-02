@@ -10,8 +10,10 @@ export default {
       },
       colors: {
         navy: '#11224d',
-        green: '#00bca1',
-        orange: '#f98125',
+        blue: '#4747ff',
+        green: '#20ad97',
+        orange: '#f7824d',
+        red: '#ee1720',
       },
       typography: () => ({
         DEFAULT: {

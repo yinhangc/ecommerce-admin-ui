@@ -109,21 +109,21 @@ export const ProductOptionsInput: React.FC<ProductOptionsInputProps> = (
         <button
           type="button"
           onClick={handleRemove}
-          className="mr-auto w-fit rounded border border-red-600 bg-red-600 px-4 py-1 text-white shadow"
+          className="border-red bg-red mr-auto w-fit rounded border px-4 py-1 text-white shadow"
         >
           移除
         </button>
         <button
           type="button"
           onClick={handleCancel}
-          className="w-fit rounded border border-blue-600 bg-white px-4 py-1 text-blue-600 shadow"
+          className="border-green-600 text-green-600 w-fit rounded border bg-white px-4 py-1 shadow"
         >
           取消
         </button>
         <button
           type="button"
           onClick={handleDone}
-          className="w-fit rounded border border-green-600 bg-white px-4 py-1 text-green-600 shadow"
+          className="border-blue text-blue w-fit rounded border bg-white px-4 py-1 shadow"
         >
           完成
         </button>

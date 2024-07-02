@@ -6,7 +6,15 @@ export const categorySchema = z.object({
   id: z.number().optional(),
   name: z.string().min(1, requiredError),
   slug: z.string().min(1, requiredError),
-  parentCategory: z.number().optional(),
+  // value should be parentCategoryId or undefined
+  parentCategoryId: z.preprocess((val) => {
+    if (val === '') return undefined;
+    if (typeof val === 'string') {
+      const parsed = parseInt(val);
+      if (!isNaN(parsed)) return parsed;
+    }
+    return val;
+  }, z.number().optional()),
 });
 
 export type Category = z.infer<typeof categorySchema>;

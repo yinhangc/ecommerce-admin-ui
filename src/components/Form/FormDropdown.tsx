@@ -1,15 +1,15 @@
 import React from 'react';
 import { FieldPath, FieldValues, UseFormRegister } from 'react-hook-form';
 
-type FormDropdownProps<T extends FieldValues> = {
+export type FormDropdownProps<T extends FieldValues> = {
   name: FieldPath<T>;
   label?: string;
   options: {
     label: string;
-    value: string;
+    value: string | undefined;
   }[];
-  required?: boolean;
   register: UseFormRegister<T>;
+  required?: boolean;
   classes?: string;
 };
 
@@ -23,7 +23,7 @@ export const FormDropdown = <T extends FieldValues>(
       {!!label && (
         <label htmlFor={name}>
           {label}
-          {required && <span className="ml-1 text-red-600">*</span>}
+          {required && <span className="text-red ml-1">*</span>}
         </label>
       )}
       <select
@@ -31,7 +31,7 @@ export const FormDropdown = <T extends FieldValues>(
         className="cursor-pointer rounded border border-gray-400 p-2"
       >
         {options.map(({ label, value }) => (
-          <option key={value} value={value}>
+          <option key={value || 'form-dropdown-default-value'} value={value}>
             {label}
           </option>
         ))}

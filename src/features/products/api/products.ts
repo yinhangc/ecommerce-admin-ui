@@ -35,7 +35,6 @@ export const productsApi = createApi({
     updateProduct: builder.mutation<Product, FormData>({
       query: (formData) => ({
         url: `/${formData.get('id')}`,
-        // url: '',
         method: 'PUT',
         body: formData,
       }),

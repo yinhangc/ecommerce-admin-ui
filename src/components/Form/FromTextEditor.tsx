@@ -270,7 +270,7 @@ const extensions = [
 const editorProps: EditorProps = {
   attributes: {
     class:
-      'prose prose-headings:font-inherit prose-p:mb-4 prose-p:mt-0 prose-a:text-blue-600 prose-a:cursor-pointer h-[13rem] max-w-none overflow-y-auto rounded border p-4 outline-none',
+      'prose prose-headings:font-inherit prose-p:mb-4 prose-p:mt-0 prose-a:text-blue prose-a:cursor-pointer h-[13rem] max-w-none overflow-y-auto rounded border p-4 outline-none',
   },
 };
 
