@@ -19,11 +19,11 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from '../api/products';
-import { Product, productSchema } from '../types/upsertProduct';
+import { TProduct, productSchema } from '../types/upsertProduct';
 import { ProductVariants } from './ProductVariants';
 
 type UpsertProductFormProps = {
-  existingData?: Product;
+  existingData?: TProduct;
   loadData?: (id: string) => QueryActionCreatorResult<any>;
 };
 
@@ -36,7 +36,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
   const [updateProduct, { isLoading: isUpdateProductLoading }] =
     useUpdateProductMutation();
 
-  const methods: UseFormReturn<Product> = useForm<Product>({
+  const methods: UseFormReturn<TProduct> = useForm<TProduct>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: '',
@@ -57,7 +57,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
   } = methods;
   // console.log('ERRORS!', errors, getValues());
 
-  const onSubmit: SubmitHandler<Product> = async (data: Product) => {
+  const onSubmit: SubmitHandler<TProduct> = async (data: TProduct) => {
     console.log('onSubmit', data);
     const formData = new FormData();
     // append product image files
@@ -65,7 +65,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
       for (const image of data.images) formData.append('file', image);
     // append other product data
     Object.keys(data).forEach((key: string) => {
-      const productKey = key as keyof Product;
+      const productKey = key as keyof TProduct;
       formData.append(
         key,
         typeof data[productKey] === 'object'
@@ -116,7 +116,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
             <div className="flex flex-col gap-y-4 rounded-md bg-white px-6 py-4 shadow-md">
               <h3 className="font-medium">一般資料</h3>
               <div className="w-full">
-                <FormInputField<Product>
+                <FormInputField<TProduct>
                   register={register}
                   name="name"
                   registerOptions={{ required: true }}
@@ -154,7 +154,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
           <div className="col-span-4 flex flex-col gap-y-6">
             <div className="flex flex-col gap-y-4 rounded-md bg-white px-6 py-4 shadow-md">
               <h3 className="font-medium">狀態</h3>
-              <FormDropdown<Product>
+              <FormDropdown<TProduct>
                 name="status"
                 required={true}
                 register={register}
@@ -167,7 +167,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
             </div>
             <div className="flex flex-col gap-y-4 rounded-md bg-white px-6 py-4 shadow-md">
               <h3 className="font-medium">分類</h3>
-              <FormDropdown<Product>
+              <FormDropdown<TProduct>
                 name="categoryId"
                 register={register}
                 options={[
@@ -185,7 +185,7 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
           </button>
           <button
             type="submit"
-            className="bg-green rounded px-4 py-2 text-white"
+            className="rounded bg-green px-4 py-2 text-white"
           >
             發佈
           </button>

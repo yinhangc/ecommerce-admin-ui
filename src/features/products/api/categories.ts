@@ -1,25 +1,32 @@
 import { getBaseQuery } from '@/lib/rtk-query';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { Category } from '../types/categories';
+import { TCategory, TListCategory } from '../types/categories';
+import { TListQuery } from '@/types';
 
 export const categoriesApi = createApi({
   reducerPath: 'categoriesApi',
   baseQuery: getBaseQuery('categories'),
   endpoints: (builder) => ({
-    createCategory: builder.mutation<Category, Category>({
+    createCategory: builder.mutation<TCategory, TCategory>({
       query: (body) => ({
         url: '',
         method: 'POST',
         body,
       }),
     }),
-    listCategory: builder.query<Category[], void>({
-      query: () => ({ url: '/list' }),
+    listCategories: builder.mutation<
+      { rows: TListCategory[]; count: number },
+      TListQuery
+    >({
+      query: (body) => ({ url: '/list', method: 'POST', body }),
     }),
-    getCategory: builder.query<Category, string>({
+    getAllCategoriesForDropdown: builder.query<TCategory[], void>({
+      query: () => ({ url: '/all' }),
+    }),
+    getCategory: builder.query<TCategory, string>({
       query: (id) => ({ url: `/${id}` }),
     }),
-    updateCategory: builder.mutation<Category, Category>({
+    updateCategory: builder.mutation<TCategory, TCategory>({
       query: (body) => ({
         url: `/${body.id}`,
         method: 'PUT',
@@ -29,5 +36,8 @@ export const categoriesApi = createApi({
   }),
 });
 
-export const { useCreateCategoryMutation, useListCategoryQuery } =
-  categoriesApi;
+export const {
+  useCreateCategoryMutation,
+  useListCategoriesMutation,
+  useGetAllCategoriesForDropdownQuery,
+} = categoriesApi;

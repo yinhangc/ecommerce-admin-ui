@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-export type OptionValue = {
+export type TOptionValue = {
   value: string;
 };
 
-export type Option = {
+export type TOption = {
   id: string | number;
   label: string;
-  values: OptionValue[];
+  values: TOptionValue[];
   isEditing?: boolean;
 };
 
@@ -18,7 +18,7 @@ export const haveProductOptionsSchema = z.object({
   haveProductOptions: z.enum(['true', 'false']),
 });
 
-export type HaveProductOptions = z.infer<typeof haveProductOptionsSchema>;
+export type THaveProductOptions = z.infer<typeof haveProductOptionsSchema>;
 // #endregion
 
 // #region - product type
@@ -99,5 +99,5 @@ export const productSchema = z.object({
   ),
 });
 
-export type Product = z.infer<typeof productSchema>;
+export type TProduct = z.infer<typeof productSchema>;
 // #endregion

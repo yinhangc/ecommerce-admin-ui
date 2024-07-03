@@ -1,4 +1,5 @@
 import { NavigationLayout } from '@/components/Layout/NavigationLayout';
+import { TListQuery } from '@/types';
 import { faEye } from '@fortawesome/free-regular-svg-icons';
 import {
   faChevronLeft,
@@ -19,13 +20,13 @@ import { debounce } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useListProductMutation } from '../api/products';
-import { ListProductPayload, ProductInList } from '../types/listProduct';
+import { useListProductsMutation } from '../api/products';
+import { TListProduct } from '../types/listProduct';
 
 export const ListProducts = () => {
-  const [listProduct] = useListProductMutation();
-  const memoizedListProduct = useMemo(() => listProduct, [listProduct]);
-  const [data, setData] = useState<{ rows: ProductInList[]; count: number }>({
+  const [listProducts] = useListProductsMutation();
+  const memoizedListProducts = useMemo(() => listProducts, [listProducts]);
+  const [data, setData] = useState<{ rows: TListProduct[]; count: number }>({
     rows: [],
     count: 0,
   });
@@ -36,7 +37,7 @@ export const ListProducts = () => {
     pageSize: 10,
   });
 
-  const columnHelper = createColumnHelper<ProductInList>();
+  const columnHelper = createColumnHelper<TListProduct>();
   const columns = [
     columnHelper.display({
       id: 'details',
@@ -144,7 +145,7 @@ export const ListProducts = () => {
 
   const loadData = useCallback(
     debounce(async () => {
-      const filter: ListProductPayload['filter'] = {};
+      const filter: TListQuery['filter'] = {};
       for (const columnFilter of columnFilters) {
         const column = table.getColumn(columnFilter.id);
         if (!column?.columnDef.meta?.filter) continue;
@@ -152,10 +153,10 @@ export const ListProducts = () => {
         if (columnFilter.value !== '<--SELECT DEFAULT VALUE-->')
           filter[matchField] = columnFilter.value as string | number;
       }
-      const orderBy: ListProductPayload['orderBy'] = [];
+      const orderBy: TListQuery['orderBy'] = [];
       for (const { id, desc } of sorting)
         orderBy.push({ [id]: desc ? 'desc' : 'asc' });
-      const response = await memoizedListProduct({
+      const response = await memoizedListProducts({
         skip: pagination.pageSize * pagination.pageIndex,
         take: pagination.pageSize,
         filter,
@@ -166,7 +167,7 @@ export const ListProducts = () => {
     }, 1200),
     [
       columnFilters,
-      memoizedListProduct,
+      memoizedListProducts,
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
@@ -178,7 +179,7 @@ export const ListProducts = () => {
     loadData();
   }, [loadData]);
 
-  const getHeaderFilter = (column: Column<ProductInList, unknown>) => {
+  const getHeaderFilter = (column: Column<TListProduct, unknown>) => {
     const columnFilter = column.columnDef.meta?.filter;
     const columnFilterValue = column.getFilterValue();
     switch (columnFilter?.variant) {
@@ -290,7 +291,7 @@ export const ListProducts = () => {
         <div className="flex items-center gap-4">
           <button
             disabled={currentPage === 1}
-            className="border-blue text-blue rounded-full border px-2 py-1 disabled:border-inherit disabled:text-gray-300"
+            className="rounded-full border border-blue px-2 py-1 text-blue disabled:border-inherit disabled:text-gray-300"
             onClick={() => table.getCanPreviousPage() && table.previousPage()}
           >
             <FontAwesomeIcon icon={faChevronLeft} className="h-4 w-4" />
@@ -309,7 +310,7 @@ export const ListProducts = () => {
           </div>
           <button
             disabled={currentPage === totalPage}
-            className="border-blue text-blue rounded-full border px-2 py-1 disabled:border-inherit disabled:text-gray-300"
+            className="rounded-full border border-blue px-2 py-1 text-blue disabled:border-inherit disabled:text-gray-300"
             onClick={() => table.getCanNextPage() && table.nextPage()}
           >
             <FontAwesomeIcon icon={faChevronRight} className="h-4 w-4" />

@@ -1,11 +1,4 @@
-export type ListProductPayload = {
-  skip: number;
-  take: number;
-  filter: { [key: string]: string | number };
-  orderBy: { [key: string]: 'asc' | 'desc' }[];
-};
-
-export type ProductInList = {
+export type TListProduct = {
   id: number;
   name: string;
   description: string;

@@ -16,5 +16,11 @@ export const categorySchema = z.object({
     return val;
   }, z.number().optional()),
 });
+export type TCategory = z.infer<typeof categorySchema>;
 
-export type Category = z.infer<typeof categorySchema>;
+export type TListCategory = {
+  id: number;
+  name: string;
+  slug: string;
+  parentCategory: TListCategory;
+};

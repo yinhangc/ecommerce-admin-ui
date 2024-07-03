@@ -5,15 +5,15 @@ import {
 } from '@/components/Form';
 import { Loader } from '@/components/Ui/Loader';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { find } from 'lodash';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import {
   useCreateCategoryMutation,
-  useListCategoryQuery,
+  useGetAllCategoriesForDropdownQuery,
 } from '../api/categories';
-import { Category, categorySchema } from '../types/categories';
-import { find } from 'lodash';
+import { TCategory, categorySchema } from '../types/categories';
 
 export const UpsertCategoryForm = () => {
   const {
@@ -23,25 +23,24 @@ export const UpsertCategoryForm = () => {
     getValues,
     handleSubmit,
     formState: { errors },
-  } = useForm<Category>({
+  } = useForm<TCategory>({
     resolver: zodResolver(categorySchema),
   });
   const watchParentCategoryId = useWatch({ control, name: 'parentCategoryId' });
   console.log('ERRORS!', errors, getValues());
 
   const [selectableCategories, setSelectableCategories] = useState<
-    FormDropdownProps<Category>['options']
+    FormDropdownProps<TCategory>['options']
   >([]);
   const [prependSlug, setPrependSlug] = useState('');
 
   const { data: categories, isLoading: isListCategoryLoading } =
-    useListCategoryQuery();
-  // control this, set categories allow to be selected
+    useGetAllCategoriesForDropdownQuery();
   const [createCategory, { isLoading: isCreateCategoryLoading }] =
     useCreateCategoryMutation();
   console.log(categories);
 
-  const onSubmit: SubmitHandler<Category> = async (data: Category) => {
+  const onSubmit: SubmitHandler<TCategory> = async (data: TCategory) => {
     console.log('data', data);
     data.slug = prependSlug + data.slug;
     // return;
@@ -57,7 +56,7 @@ export const UpsertCategoryForm = () => {
   };
 
   useEffect(() => {
-    const selectable: FormDropdownProps<Category>['options'] = [
+    const selectable: FormDropdownProps<TCategory>['options'] = [
       { label: '<-- NO PARENT CATEGORY -->', value: '' },
     ];
     if (categories && categories.length > 0)
@@ -93,7 +92,7 @@ export const UpsertCategoryForm = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="w-full">
       <div className="flex flex-col gap-y-4 rounded-md bg-white px-6 py-4 shadow-md">
         <div className="w-full">
-          <FormInputField<Category>
+          <FormInputField<TCategory>
             register={register}
             name="name"
             registerOptions={{ required: true }}
@@ -103,7 +102,7 @@ export const UpsertCategoryForm = () => {
           />
         </div>
         <div className="w-full">
-          <FormInputField<Category>
+          <FormInputField<TCategory>
             register={register}
             name="slug"
             registerOptions={{ required: true }}
@@ -114,7 +113,7 @@ export const UpsertCategoryForm = () => {
           />
         </div>
         <div className="w-full">
-          <FormDropdown<Category>
+          <FormDropdown<TCategory>
             register={register}
             name="parentCategoryId"
             label="母分類"

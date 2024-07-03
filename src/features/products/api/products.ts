@@ -1,22 +1,23 @@
 import { getBaseQuery } from '@/lib/rtk-query';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { ListProductPayload, ProductInList } from '../types/listProduct';
-import { Product } from '../types/upsertProduct';
+import { TListProduct } from '../types/listProduct';
+import { TProduct } from '../types/upsertProduct';
+import { TListQuery } from '@/types';
 
 export const productsApi = createApi({
   reducerPath: 'productsApi',
   baseQuery: getBaseQuery('products'),
   endpoints: (builder) => ({
-    createProduct: builder.mutation<Product, FormData>({
+    createProduct: builder.mutation<TProduct, FormData>({
       query: (formData) => ({
         url: '',
         method: 'POST',
         body: formData,
       }),
     }),
-    listProduct: builder.mutation<
-      { rows: ProductInList[]; count: number },
-      ListProductPayload
+    listProducts: builder.mutation<
+      { rows: TListProduct[]; count: number },
+      TListQuery
     >({
       query: (body) => ({
         url: '/list',
@@ -24,15 +25,15 @@ export const productsApi = createApi({
         body,
       }),
     }),
-    getProduct: builder.query<Product, string>({
+    getProduct: builder.query<TProduct, string>({
       query: (id) => ({ url: `/${id}` }),
       // TODO: remove isEditing here
-      transformResponse: (response: Product, meta, arg) => {
+      transformResponse: (response: TProduct, meta, arg) => {
         for (const option of response.options) option.isEditing = false;
         return response;
       },
     }),
-    updateProduct: builder.mutation<Product, FormData>({
+    updateProduct: builder.mutation<TProduct, FormData>({
       query: (formData) => ({
         url: `/${formData.get('id')}`,
         method: 'PUT',
@@ -44,7 +45,7 @@ export const productsApi = createApi({
 
 export const {
   useCreateProductMutation,
-  useListProductMutation,
+  useListProductsMutation,
   useGetProductQuery,
   useUpdateProductMutation,
 } = productsApi;

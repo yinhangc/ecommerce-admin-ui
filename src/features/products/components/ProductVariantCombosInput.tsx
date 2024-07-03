@@ -1,13 +1,13 @@
 import { FormInputField } from '@/components/Form';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { Product } from '../types/upsertProduct';
+import { TProduct } from '../types/upsertProduct';
 
 export const ProductVariantCombosInput = () => {
   const {
     register,
     control,
     formState: { errors },
-  } = useFormContext<Product>();
+  } = useFormContext<TProduct>();
 
   const watchVariants = useWatch({
     control,
@@ -30,7 +30,7 @@ export const ProductVariantCombosInput = () => {
             <tr key={id} className="border-b border-neutral-200">
               <td className="px-4 py-2">{name}</td>
               <td className="px-4 py-2">
-                <FormInputField<Product>
+                <FormInputField<TProduct>
                   register={register}
                   name={`variants.${index}.price`}
                   registerOptions={{ min: 1, valueAsNumber: true }}
@@ -41,7 +41,7 @@ export const ProductVariantCombosInput = () => {
                 />
               </td>
               <td className="px-4 py-2">
-                <FormInputField<Product>
+                <FormInputField<TProduct>
                   register={register}
                   name={`variants.${index}.quantity`}
                   registerOptions={{ min: 0, valueAsNumber: true }}
@@ -52,7 +52,7 @@ export const ProductVariantCombosInput = () => {
                 />
               </td>
               <td className="px-4 py-2">
-                <FormInputField<Product>
+                <FormInputField<TProduct>
                   register={register}
                   name={`variants.${index}.sku`}
                   placeholder="SKU"

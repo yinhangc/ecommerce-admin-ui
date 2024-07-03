@@ -8,9 +8,9 @@ import findIndex from 'lodash/findIndex';
 import { useCallback, useEffect } from 'react';
 import { useForm, useFormContext, useWatch } from 'react-hook-form';
 import {
-  HaveProductOptions,
-  Option,
-  Product,
+  TOption,
+  TProduct,
+  THaveProductOptions,
   haveProductOptionsSchema,
 } from '../types/upsertProduct';
 import { ProductOptionsDisplay } from './ProductOptionsDisplay';
@@ -18,7 +18,7 @@ import { ProductOptionsInput } from './ProductOptionsInput';
 import { ProductVariantCombosInput } from './ProductVariantCombosInput';
 
 type ProductVariantsProps = {
-  existingData?: Product;
+  existingData?: TProduct;
 };
 
 export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
@@ -29,12 +29,12 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
     setValue,
     getValues,
     formState: { errors },
-  } = useFormContext<Product>();
+  } = useFormContext<TProduct>();
   const {
     reset: resetHaveProductOptions,
     register: registerHaveProductOptions,
     control: controlHaveProductOptions,
-  } = useForm<HaveProductOptions>({
+  } = useForm<THaveProductOptions>({
     resolver: zodResolver(haveProductOptionsSchema),
     defaultValues: {
       haveProductOptions: 'false',
@@ -51,7 +51,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
   const haveProductOptions = watchHaveProductOptions === 'true';
 
   const updateOptionsAndVariants = useCallback(
-    (options: Option[]) => {
+    (options: TOption[]) => {
       setValue('options', options);
       if (find(options, { isEditing: true })) return;
       // console.log('updateOptionsAndVariants', options, getValues('variants'));
@@ -97,7 +97,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
   };
 
   const handleUpdateOption = useCallback(
-    (option: Option) => {
+    (option: TOption) => {
       const options = cloneDeep(getValues('options'));
       const index = findIndex(options, { id: option.id });
       if (index !== -1) options[index] = option;
@@ -161,7 +161,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
 
   return (
     <div className="flex flex-col gap-y-4">
-      <FormRadioSelect<HaveProductOptions>
+      <FormRadioSelect<THaveProductOptions>
         name="haveProductOptions"
         register={registerHaveProductOptions}
         options={[
@@ -194,7 +194,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
           )}
           <button
             type="button"
-            className="border-blue text-blue rounded border px-4 py-1"
+            className="rounded border border-blue px-4 py-1 text-blue"
             onClick={handleAddOption}
           >
             <FontAwesomeIcon icon={faPlus} className="mr-1" />
@@ -205,7 +205,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
       )}
       {!haveProductOptions && (
         <div>
-          <FormInputField<Product>
+          <FormInputField<TProduct>
             register={register}
             name={`variants.0.price`}
             label="價錢"
@@ -215,7 +215,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
             classes="w-[150px] py-1 px-2"
             error={errors?.variants?.[0]?.price}
           />
-          <FormInputField<Product>
+          <FormInputField<TProduct>
             register={register}
             name={`variants.0.quantity`}
             label="數量"
@@ -225,7 +225,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
             classes="w-[150px] py-1 px-2"
             error={errors?.variants?.[0]?.quantity}
           />
-          <FormInputField<Product>
+          <FormInputField<TProduct>
             register={register}
             name={`variants.0.sku`}
             label="SKU"

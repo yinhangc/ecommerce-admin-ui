@@ -1,8 +1,8 @@
-import { Option } from '../types/upsertProduct';
+import { TOption } from '../types/upsertProduct';
 
 type ProductOptionsInputProps = {
-  option: Option;
-  handleUpdateOption: (option: Option) => void;
+  option: TOption;
+  handleUpdateOption: (option: TOption) => void;
 };
 
 export const ProductOptionsDisplay: React.FC<ProductOptionsInputProps> = (

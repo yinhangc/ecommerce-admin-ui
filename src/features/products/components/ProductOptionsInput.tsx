@@ -1,21 +1,21 @@
 import { FormInputField } from '@/components/Form';
-import { cloneDeep, find, last } from 'lodash';
+import { cloneDeep, find } from 'lodash';
 import objectPath from 'object-path';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
-import { Product, Option } from '../types/upsertProduct';
+import { TProduct, TOption } from '../types/upsertProduct';
 
 type ProductOptionsInputProps = {
-  option: Option;
+  option: TOption;
   optionIndex: number;
-  handleUpdateOption: (option: Option) => void;
+  handleUpdateOption: (option: TOption) => void;
   handleRemoveOption: (id: string | number) => void;
 };
 
 export const ProductOptionsInput: React.FC<ProductOptionsInputProps> = (
   props,
 ) => {
-  const initialValue = useRef<Option>();
+  const initialValue = useRef<TOption>();
   const { option, optionIndex, handleUpdateOption, handleRemoveOption } = props;
   const {
     register,
@@ -23,7 +23,7 @@ export const ProductOptionsInput: React.FC<ProductOptionsInputProps> = (
     trigger,
     getValues,
     formState: { errors },
-  } = useFormContext<Product>();
+  } = useFormContext<TProduct>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: `options.${optionIndex}.values`,
@@ -79,7 +79,7 @@ export const ProductOptionsInput: React.FC<ProductOptionsInputProps> = (
   return (
     <div className="flex w-full flex-col gap-y-3">
       <div className="flex flex-col">
-        <FormInputField<Product>
+        <FormInputField<TProduct>
           register={register}
           name={`options.${optionIndex}.label`}
           placeholder="Option Name"
@@ -90,7 +90,7 @@ export const ProductOptionsInput: React.FC<ProductOptionsInputProps> = (
         <div className="ml-6 flex flex-col gap-y-3">
           {fields.map((field, index) => {
             return (
-              <FormInputField<Product>
+              <FormInputField<TProduct>
                 key={field.id}
                 register={register}
                 name={`options.${optionIndex}.values.${index}.value`}
@@ -109,7 +109,7 @@ export const ProductOptionsInput: React.FC<ProductOptionsInputProps> = (
         <button
           type="button"
           onClick={handleRemove}
-          className="border-red bg-red mr-auto w-fit rounded border px-4 py-1 text-white shadow"
+          className="mr-auto w-fit rounded border border-red bg-red px-4 py-1 text-white shadow"
         >
           移除
         </button>
@@ -123,7 +123,7 @@ export const ProductOptionsInput: React.FC<ProductOptionsInputProps> = (
         <button
           type="button"
           onClick={handleDone}
-          className="border-blue text-blue w-fit rounded border bg-white px-4 py-1 shadow"
+          className="w-fit rounded border border-blue bg-white px-4 py-1 text-blue shadow"
         >
           完成
         </button>
