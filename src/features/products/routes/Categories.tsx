@@ -5,6 +5,8 @@ import {
   ColumnFilter,
   SortingState,
   createColumnHelper,
+  getCoreRowModel,
+  useReactTable,
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
@@ -64,6 +66,24 @@ export const Categories = () => {
       },
     }),
   ];
+
+  const table = useReactTable({
+    data: data.rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    manualFiltering: true,
+    onColumnFiltersChange: setColumnFilters,
+    manualSorting: true,
+    onSortingChange: setSorting,
+    manualPagination: true,
+    rowCount: data.count,
+    onPaginationChange: setPagination,
+    state: {
+      columnFilters,
+      sorting,
+      pagination,
+    },
+  });
 
   return (
     <NavigationLayout>
