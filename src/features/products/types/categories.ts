@@ -7,7 +7,7 @@ export const categorySchema = z.object({
   name: z.string().min(1, requiredError),
   slug: z.string().min(1, requiredError),
   // value should be parentCategoryId or undefined
-  parentCategoryId: z.preprocess((val) => {
+  parentId: z.preprocess((val) => {
     if (val === '') return undefined;
     if (typeof val === 'string') {
       const parsed = parseInt(val);
@@ -18,9 +18,11 @@ export const categorySchema = z.object({
 });
 export type TCategory = z.infer<typeof categorySchema>;
 
-export type TListCategory = {
+export type TCategoryInList = {
   id: number;
   name: string;
   slug: string;
-  parentCategory: TListCategory;
+  createdAt: string;
+  updatedAt: string;
+  parent: TCategoryInList;
 };

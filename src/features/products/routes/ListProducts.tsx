@@ -162,7 +162,7 @@ export const ListProducts = () => {
         filter,
         orderBy,
       }).unwrap();
-      console.log('(loadData) List Product RES', response);
+      console.log('(loadData) List Products RES', response);
       setData(response);
     }, 1200),
     [

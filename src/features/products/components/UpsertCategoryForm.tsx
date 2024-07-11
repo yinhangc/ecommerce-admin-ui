@@ -5,17 +5,45 @@ import {
 } from '@/components/Form';
 import { Loader } from '@/components/Ui/Loader';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { QueryActionCreatorResult } from '@reduxjs/toolkit/query';
 import { find } from 'lodash';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm, useWatch } from 'react-hook-form';
-import { Link } from 'react-router-dom';
 import {
   useCreateCategoryMutation,
   useGetAllCategoriesForDropdownQuery,
+  useUpdateCategoryMutation,
 } from '../api/categories';
 import { TCategory, categorySchema } from '../types/categories';
 
-export const UpsertCategoryForm = () => {
+type TUpsertCategoryFormProps = {
+  existingData?: TCategory;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  loadData?: (id: string) => QueryActionCreatorResult<any>;
+};
+
+export const UpsertCategoryForm: React.FC<TUpsertCategoryFormProps> = (
+  props,
+) => {
+  const { existingData, loadData } = props;
+
+  const [selectableCategories, setSelectableCategories] = useState<
+    FormDropdownProps<TCategory>['options']
+  >([]);
+  const [prependSlug, setPrependSlug] = useState('/');
+
+  const {
+    data: categories,
+    isLoading: isListCategoryLoading,
+    refetch: refetchCategories,
+  } = useGetAllCategoriesForDropdownQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+  const [createCategory, { isLoading: isCreateCategoryLoading }] =
+    useCreateCategoryMutation();
+  const [updateCategory, { isLoading: isUpdateCategoryLoading }] =
+    useUpdateCategoryMutation();
+
   const {
     reset,
     control,
@@ -26,62 +54,70 @@ export const UpsertCategoryForm = () => {
   } = useForm<TCategory>({
     resolver: zodResolver(categorySchema),
   });
-  const watchParentCategoryId = useWatch({ control, name: 'parentCategoryId' });
-  console.log('ERRORS!', errors, getValues());
-
-  const [selectableCategories, setSelectableCategories] = useState<
-    FormDropdownProps<TCategory>['options']
-  >([]);
-  const [prependSlug, setPrependSlug] = useState('');
-
-  const { data: categories, isLoading: isListCategoryLoading } =
-    useGetAllCategoriesForDropdownQuery();
-  const [createCategory, { isLoading: isCreateCategoryLoading }] =
-    useCreateCategoryMutation();
-  console.log(categories);
+  const watchParentCategoryId = useWatch({ control, name: 'parentId' });
+  // console.log('ERRORS!', errors, getValues());
 
   const onSubmit: SubmitHandler<TCategory> = async (data: TCategory) => {
-    console.log('data', data);
     data.slug = prependSlug + data.slug;
+    console.log('onSubmit', data);
     // return;
     try {
-      const category = await createCategory(data).unwrap();
-      console.log('created category', category);
-      alert('您已成功創建分類！');
-      reset();
+      if (existingData) {
+        const category = await updateCategory(data).unwrap();
+        alert('您已成功更新分類！');
+        if (loadData) loadData((category.id as number).toString());
+      } else {
+        const category = await createCategory(data).unwrap();
+        console.log('created category', category);
+        alert('您已成功創建分類！');
+        reset();
+      }
+      refetchCategories();
     } catch (e) {
       console.log('ERROR!', e);
       alert('分類創建失敗');
     }
   };
 
+  // set dropdown options and set data if have existing data on init render
   useEffect(() => {
     const selectable: FormDropdownProps<TCategory>['options'] = [
       { label: '<-- NO PARENT CATEGORY -->', value: '' },
     ];
+    console.log('getAll categories', categories);
     if (categories && categories.length > 0)
       selectable.push(
-        ...categories.map((cat) => ({
-          label: cat.name,
-          value: cat.id ? cat.id.toString() : '',
-        })),
+        ...categories
+          .map((cat: TCategory) => ({
+            label: `${cat.name} (${cat.slug}) `,
+            value: cat.id ? cat.id.toString() : '',
+          }))
+          .filter((cat) => cat.value !== getValues('id')?.toString()),
       );
     setSelectableCategories(selectable);
-  }, [categories]);
+    if (existingData) {
+      console.log(existingData);
+      const trimmedSlug = existingData.slug.match(/[^/]+$/);
+      reset({ ...existingData, slug: trimmedSlug?.[0] || existingData.slug });
+    }
+  }, [categories, getValues, existingData, reset]);
 
+  // set prepend slug
   useEffect(() => {
     let prepend = '/';
-    // TODO: if (categorySchema.safeParse(watchParentCategoryId).success) {
     if (watchParentCategoryId) {
       const parent = find(categories, { id: Number(watchParentCategoryId) });
-      console.log('parent', parent);
       if (parent) prepend = `${parent.slug}/`;
     }
     setPrependSlug(prepend);
-    console.log('prepend', prepend);
   }, [categories, watchParentCategoryId]);
 
-  if (isListCategoryLoading || selectableCategories.length === 0)
+  if (
+    isListCategoryLoading ||
+    selectableCategories.length === 0 ||
+    isCreateCategoryLoading ||
+    isUpdateCategoryLoading
+  )
     return (
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <Loader size="large" />
@@ -115,7 +151,7 @@ export const UpsertCategoryForm = () => {
         <div className="w-full">
           <FormDropdown<TCategory>
             register={register}
-            name="parentCategoryId"
+            name="parentId"
             label="母分類"
             options={selectableCategories}
             classes="flex-1"
@@ -123,11 +159,6 @@ export const UpsertCategoryForm = () => {
         </div>
       </div>
       <div className="mt-8 flex justify-end gap-x-4">
-        <button type="button" className="rounded bg-gray-500 text-white">
-          <Link to="/products/categories" className="block px-4 py-2">
-            返回
-          </Link>
-        </button>
         <button type="submit" className="rounded bg-green px-4 py-2 text-white">
           儲存
         </button>

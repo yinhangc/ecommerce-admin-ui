@@ -3,12 +3,14 @@ import { Loader } from '@/components/Ui/Loader';
 import { faArrowLeftLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useParams } from 'react-router-dom';
-import { useGetProductQuery } from '../api/products';
-import { UpsertProductForm } from '../components/UpsertProductForm';
+import { useGetCategoryQuery } from '../api/categories';
+import { UpsertCategoryForm } from '../components/UpsertCategoryForm';
 
-export const ProductDetail = () => {
-  const { id: productId } = useParams();
-  const { data, isLoading, refetch } = useGetProductQuery(productId as string);
+export const CategoryDetail = () => {
+  const { id: categoryId } = useParams();
+  const { data, isLoading, refetch } = useGetCategoryQuery(
+    categoryId as string,
+  );
 
   return (
     <NavigationLayout>
@@ -21,13 +23,13 @@ export const ProductDetail = () => {
         <>
           <div className="mb-4 flex items-center gap-x-4">
             <button>
-              <Link to="/products/list">
+              <Link to="/products/categories">
                 <FontAwesomeIcon icon={faArrowLeftLong} />
               </Link>
             </button>
-            <h2 className=" text-2xl font-medium">產品詳情 #{productId}</h2>
+            <h2 className=" text-2xl font-medium">分類詳情 #{categoryId}</h2>
           </div>
-          <UpsertProductForm existingData={data} loadData={refetch} />
+          <UpsertCategoryForm existingData={data} loadData={refetch} />
         </>
       )}
     </NavigationLayout>

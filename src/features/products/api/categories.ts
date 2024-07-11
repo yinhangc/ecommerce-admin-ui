@@ -1,6 +1,6 @@
 import { getBaseQuery } from '@/lib/rtk-query';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { TCategory, TListCategory } from '../types/categories';
+import { TCategory, TCategoryInList } from '../types/categories';
 import { TListQuery } from '@/types';
 
 export const categoriesApi = createApi({
@@ -15,7 +15,7 @@ export const categoriesApi = createApi({
       }),
     }),
     listCategories: builder.mutation<
-      { rows: TListCategory[]; count: number },
+      { rows: TCategoryInList[]; count: number },
       TListQuery
     >({
       query: (body) => ({ url: '/list', method: 'POST', body }),
@@ -40,4 +40,6 @@ export const {
   useCreateCategoryMutation,
   useListCategoriesMutation,
   useGetAllCategoriesForDropdownQuery,
+  useGetCategoryQuery,
+  useUpdateCategoryMutation,
 } = categoriesApi;

@@ -1,5 +1,6 @@
 import {
   FormDropdown,
+  FormDropdownProps,
   FormInputField,
   FromTextEditor,
 } from '@/components/Form';
@@ -21,16 +22,25 @@ import {
 } from '../api/products';
 import { TProduct, productSchema } from '../types/upsertProduct';
 import { ProductVariants } from './ProductVariants';
+import { useGetAllCategoriesForDropdownQuery } from '../api/categories';
+import { TCategory } from '../types/categories';
 
-type UpsertProductFormProps = {
+type TUpsertProductFormProps = {
   existingData?: TProduct;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loadData?: (id: string) => QueryActionCreatorResult<any>;
 };
 
-export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
+export const UpsertProductForm: React.FC<TUpsertProductFormProps> = (props) => {
   const { existingData, loadData } = props;
-  // console.log('existingData', existingData);
+  const [selectableCategories, setSelectableCategories] = useState<
+    FormDropdownProps<TCategory>['options']
+  >([]);
 
+  const { data: categories, isLoading: isListCategoryLoading } =
+    useGetAllCategoriesForDropdownQuery(undefined, {
+      refetchOnMountOrArgChange: true,
+    });
   const [createProduct, { isLoading: isCreateProductLoading }] =
     useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdateProductLoading }] =
@@ -93,11 +103,26 @@ export const UpsertProductForm: React.FC<UpsertProductFormProps> = (props) => {
     if (e.key === 'Enter') e.preventDefault();
   };
 
+  // set dropdown options and set data if have existing data on init render
   useEffect(() => {
+    const selectable: FormDropdownProps<TCategory>['options'] = [
+      { label: '<-- NO PARENT CATEGORY -->', value: '' },
+    ];
+    console.log('getAll categories', categories);
+    if (categories && categories.length > 0)
+      selectable.push(
+        ...categories
+          .map((cat: TCategory) => ({
+            label: `${cat.name} (${cat.slug}) `,
+            value: cat.id ? cat.id.toString() : '',
+          }))
+          .filter((cat) => cat.value !== getValues('id')?.toString()),
+      );
+    setSelectableCategories(selectable);
     if (existingData) reset(existingData);
-  }, [existingData, reset]);
+  }, [categories, existingData, getValues, reset]);
 
-  if (isCreateProductLoading || isUpdateProductLoading)
+  if (isListCategoryLoading || isCreateProductLoading || isUpdateProductLoading)
     return (
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <Loader size="large" />
