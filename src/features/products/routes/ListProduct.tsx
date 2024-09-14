@@ -23,7 +23,7 @@ import { NavLink } from 'react-router-dom';
 import { useListProductsMutation } from '../api/products';
 import { TListProduct } from '../types/listProduct';
 
-export const ListProducts = () => {
+export const ListProduct = () => {
   const [listProducts] = useListProductsMutation();
   const memoizedListProducts = useMemo(() => listProducts, [listProducts]);
   const [data, setData] = useState<{ rows: TListProduct[]; count: number }>({

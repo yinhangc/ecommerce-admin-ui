@@ -4,7 +4,7 @@ import { faArrowLeftLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useParams } from 'react-router-dom';
 import { useGetProductQuery } from '../api/products';
-import { UpsertProductForm } from '../components/UpsertProductForm';
+import { ProductForm } from '../components/ProductForm';
 
 export const ProductDetail = () => {
   const { id: productId } = useParams();
@@ -27,7 +27,7 @@ export const ProductDetail = () => {
             </button>
             <h2 className=" text-2xl font-medium">產品詳情 #{productId}</h2>
           </div>
-          <UpsertProductForm existingData={data} loadData={refetch} />
+          <ProductForm existingData={data} loadData={refetch} />
         </>
       )}
     </NavigationLayout>

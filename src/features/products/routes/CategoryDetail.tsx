@@ -4,7 +4,7 @@ import { faArrowLeftLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useParams } from 'react-router-dom';
 import { useGetCategoryQuery } from '../api/categories';
-import { UpsertCategoryForm } from '../components/UpsertCategoryForm';
+import { ProductCategoryForm } from '../components/ProductCategoryForm';
 
 export const CategoryDetail = () => {
   const { id: categoryId } = useParams();
@@ -29,7 +29,7 @@ export const CategoryDetail = () => {
             </button>
             <h2 className=" text-2xl font-medium">分類詳情 #{categoryId}</h2>
           </div>
-          <UpsertCategoryForm existingData={data} loadData={refetch} />
+          <ProductCategoryForm existingData={data} loadData={refetch} />
         </>
       )}
     </NavigationLayout>

@@ -27,11 +27,6 @@ export const productsApi = createApi({
     }),
     getProduct: builder.query<TProduct, string>({
       query: (id) => ({ url: `/${id}` }),
-      // TODO: remove isEditing here
-      transformResponse: (response: TProduct, meta, arg) => {
-        for (const option of response.options) option.isEditing = false;
-        return response;
-      },
     }),
     updateProduct: builder.mutation<TProduct, FormData>({
       query: (formData) => ({

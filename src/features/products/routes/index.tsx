@@ -3,13 +3,13 @@ import { Categories } from './Categories';
 import { CategoryDetail } from './CategoryDetail';
 import { CreateCategory } from './CreateCategory';
 import { CreateProduct } from './CreateProduct';
-import { ListProducts } from './ListProducts';
+import { ListProduct } from './ListProduct';
 import { ProductDetail } from './ProductDetail';
 
 export const ProductsRoute = () => {
   return (
     <Routes>
-      <Route path="/list" element={<ListProducts />}></Route>
+      <Route path="/list" element={<ListProduct />}></Route>
       <Route path="/list/:id" element={<ProductDetail />}></Route>
       <Route path="/create" element={<CreateProduct />}></Route>
       <Route path="/categories" element={<Categories />}></Route>

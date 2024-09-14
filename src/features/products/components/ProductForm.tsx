@@ -8,7 +8,7 @@ import { FormImageUpload } from '@/components/Form/FormImageUpload';
 import { Loader } from '@/components/Ui/Loader';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { QueryActionCreatorResult } from '@reduxjs/toolkit/query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Controller,
   FormProvider,
@@ -25,22 +25,20 @@ import { ProductVariants } from './ProductVariants';
 import { useGetAllCategoriesForDropdownQuery } from '../api/categories';
 import { TCategory } from '../types/categories';
 
-type TUpsertProductFormProps = {
+type TProductFormProps = {
   existingData?: TProduct;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loadData?: (id: string) => QueryActionCreatorResult<any>;
 };
 
-export const UpsertProductForm: React.FC<TUpsertProductFormProps> = (props) => {
+export const ProductForm: React.FC<TProductFormProps> = (props) => {
   const { existingData, loadData } = props;
-  const [selectableCategories, setSelectableCategories] = useState<
+  const [categoryOptions, setCategoryOptions] = useState<
     FormDropdownProps<TCategory>['options']
   >([]);
 
   const { data: categories, isLoading: isListCategoryLoading } =
-    useGetAllCategoriesForDropdownQuery(undefined, {
-      refetchOnMountOrArgChange: true,
-    });
+    useGetAllCategoriesForDropdownQuery();
   const [createProduct, { isLoading: isCreateProductLoading }] =
     useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdateProductLoading }] =
@@ -52,6 +50,7 @@ export const UpsertProductForm: React.FC<TUpsertProductFormProps> = (props) => {
       name: '',
       description: '',
       status: 'INACTIVE',
+      categoryId: null,
       images: [],
       options: [],
       variants: [],
@@ -76,6 +75,7 @@ export const UpsertProductForm: React.FC<TUpsertProductFormProps> = (props) => {
     // append other product data
     Object.keys(data).forEach((key: string) => {
       const productKey = key as keyof TProduct;
+      console.log('productKey:', productKey, typeof data[productKey]);
       formData.append(
         key,
         typeof data[productKey] === 'object'
@@ -103,7 +103,7 @@ export const UpsertProductForm: React.FC<TUpsertProductFormProps> = (props) => {
     if (e.key === 'Enter') e.preventDefault();
   };
 
-  // set dropdown options and set data if have existing data on init render
+  // set dropdown options and data (if any) on init render
   useEffect(() => {
     const selectable: FormDropdownProps<TCategory>['options'] = [
       { label: '<-- NO PARENT CATEGORY -->', value: '' },
@@ -111,14 +111,12 @@ export const UpsertProductForm: React.FC<TUpsertProductFormProps> = (props) => {
     console.log('getAll categories', categories);
     if (categories && categories.length > 0)
       selectable.push(
-        ...categories
-          .map((cat: TCategory) => ({
-            label: `${cat.name} (${cat.slug}) `,
-            value: cat.id ? cat.id.toString() : '',
-          }))
-          .filter((cat) => cat.value !== getValues('id')?.toString()),
+        ...categories.map((cat: TCategory) => ({
+          label: `${cat.name} (${cat.slug}) `,
+          value: cat.id ? cat.id.toString() : '',
+        })),
       );
-    setSelectableCategories(selectable);
+    setCategoryOptions(selectable);
     if (existingData) reset(existingData);
   }, [categories, existingData, getValues, reset]);
 
@@ -195,10 +193,7 @@ export const UpsertProductForm: React.FC<TUpsertProductFormProps> = (props) => {
               <FormDropdown<TProduct>
                 name="categoryId"
                 register={register}
-                options={[
-                  { label: 'Category 1', value: '1' },
-                  { label: 'Category 2', value: '2' },
-                ]}
+                options={categoryOptions}
                 classes="flex-1"
               />
             </div>

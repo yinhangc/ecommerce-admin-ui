@@ -29,7 +29,7 @@ export const productSchema = z.object({
   status: z.string().refine((value) => ['ACTIVE', 'INACTIVE'].includes(value), {
     message: '無效的數值',
   }),
-  categoryId: z.string().transform(Number).optional(),
+  categoryId: z.string().transform((val) => (val === '' ? null : Number(val))),
   images: z.any().refine(
     (value) => {
       for (const im of value) {
@@ -56,7 +56,6 @@ export const productSchema = z.object({
             values.length === 0 ||
             (values.length === 1 && values[0].value.trim() === '')
           ) {
-            console.log('SUPER REFINE PROB', values);
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: requiredError,

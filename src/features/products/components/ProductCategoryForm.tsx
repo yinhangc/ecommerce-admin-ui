@@ -16,18 +16,18 @@ import {
 } from '../api/categories';
 import { TCategory, categorySchema } from '../types/categories';
 
-type TUpsertCategoryFormProps = {
+type TProductCategoryFormProps = {
   existingData?: TCategory;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loadData?: (id: string) => QueryActionCreatorResult<any>;
 };
 
-export const UpsertCategoryForm: React.FC<TUpsertCategoryFormProps> = (
+export const ProductCategoryForm: React.FC<TProductCategoryFormProps> = (
   props,
 ) => {
   const { existingData, loadData } = props;
 
-  const [selectableCategories, setSelectableCategories] = useState<
+  const [categoryOptions, setCategoryOptions] = useState<
     FormDropdownProps<TCategory>['options']
   >([]);
   const [prependSlug, setPrependSlug] = useState('/');
@@ -81,12 +81,12 @@ export const UpsertCategoryForm: React.FC<TUpsertCategoryFormProps> = (
 
   // set dropdown options and set data if have existing data on init render
   useEffect(() => {
-    const selectable: FormDropdownProps<TCategory>['options'] = [
+    const options: FormDropdownProps<TCategory>['options'] = [
       { label: '<-- NO PARENT CATEGORY -->', value: '' },
     ];
     console.log('getAll categories', categories);
     if (categories && categories.length > 0)
-      selectable.push(
+      options.push(
         ...categories
           .map((cat: TCategory) => ({
             label: `${cat.name} (${cat.slug}) `,
@@ -94,7 +94,7 @@ export const UpsertCategoryForm: React.FC<TUpsertCategoryFormProps> = (
           }))
           .filter((cat) => cat.value !== getValues('id')?.toString()),
       );
-    setSelectableCategories(selectable);
+    setCategoryOptions(options);
     if (existingData) {
       console.log(existingData);
       const trimmedSlug = existingData.slug.match(/[^/]+$/);
@@ -114,7 +114,7 @@ export const UpsertCategoryForm: React.FC<TUpsertCategoryFormProps> = (
 
   if (
     isListCategoryLoading ||
-    selectableCategories.length === 0 ||
+    categoryOptions.length === 0 ||
     isCreateCategoryLoading ||
     isUpdateCategoryLoading
   )
@@ -153,7 +153,7 @@ export const UpsertCategoryForm: React.FC<TUpsertCategoryFormProps> = (
             register={register}
             name="parentId"
             label="母分類"
-            options={selectableCategories}
+            options={categoryOptions}
             classes="flex-1"
           />
         </div>
