@@ -34,7 +34,7 @@ export const FormInputField = <T extends FieldValues>(
     prepend,
   } = props;
 
-  // control html input behavior
+  // Control html input behavior
   const inputAttributes: InputHTMLAttributes<HTMLInputElement> = {};
   if (typeof registerOptions?.min === 'number')
     inputAttributes.min = registerOptions.min;
@@ -47,7 +47,7 @@ export const FormInputField = <T extends FieldValues>(
         <label htmlFor={name}>
           {label}
           {registerOptions?.required && (
-            <span className="text-red ml-1">*</span>
+            <span className="ml-1 text-red">*</span>
           )}
         </label>
       )}
@@ -65,7 +65,7 @@ export const FormInputField = <T extends FieldValues>(
           {...register(name, registerOptions)}
         />
       </div>
-      {!!error && <p className="text-red text-sm">{error.message}</p>}
+      {!!error && <p className="text-sm text-red">{error.message}</p>}
     </div>
   );
 };

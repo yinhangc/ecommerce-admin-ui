@@ -35,8 +35,7 @@ type FormImageUpload = {
 };
 export const FormImageUpload: React.FC<FormImageUpload> = (props) => {
   const { onChange, value } = props;
-  console.log('FormImageUpload value', value);
-  // const [uploadedImages, setUploadedImages] = useState<(string | Blob)[]>([]);
+  // console.log('FormImageUpload value', value);
   const [previewImageUrls, setPreviewImageUrls] = useState<string[]>([]);
 
   const handleUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +68,7 @@ export const FormImageUpload: React.FC<FormImageUpload> = (props) => {
                 <button type="button" onClick={() => handleRemove(i)}>
                   <FontAwesomeIcon
                     icon={faXmark}
-                    className="text-red absolute right-0 top-0 h-5 w-5 rounded-full bg-gray-200 bg-opacity-80 p-2"
+                    className="absolute right-0 top-0 h-5 w-5 rounded-full bg-gray-200 bg-opacity-80 p-2 text-red"
                   />
                 </button>
                 <div className="flex max-h-[10rem] max-w-[10rem]">

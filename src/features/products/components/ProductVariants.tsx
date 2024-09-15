@@ -116,7 +116,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
     [getValues, updateOptionsAndVariants],
   );
 
-  // subscribe to haveProductOptions change
+  // Subscribe to haveProductOptions change
   useEffect(() => {
     if (watchHaveProductOptions === 'false') {
       setValue('options', []);
@@ -149,7 +149,7 @@ export const ProductVariants: React.FC<ProductVariantsProps> = (props) => {
     }
   }, [setValue, existingData, watchHaveProductOptions]);
 
-  // set default haveProductOptions on init
+  // Set default haveProductOptions on init render
   useEffect(() => {
     resetHaveProductOptions({
       haveProductOptions:

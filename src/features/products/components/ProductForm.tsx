@@ -69,10 +69,10 @@ export const ProductForm: React.FC<TProductFormProps> = (props) => {
   const onSubmit: SubmitHandler<TProduct> = async (data: TProduct) => {
     console.log('onSubmit', data);
     const formData = new FormData();
-    // append product image files
+    // Append product image files
     if (data.images.length > 0)
       for (const image of data.images) formData.append('file', image);
-    // append other product data
+    // Append other product data
     Object.keys(data).forEach((key: string) => {
       const productKey = key as keyof TProduct;
       console.log('productKey:', productKey, typeof data[productKey]);
@@ -103,7 +103,7 @@ export const ProductForm: React.FC<TProductFormProps> = (props) => {
     if (e.key === 'Enter') e.preventDefault();
   };
 
-  // set dropdown options and data (if any) on init render
+  // Set dropdown options and data (if any) on init render
   useEffect(() => {
     const selectable: FormDropdownProps<TCategory>['options'] = [
       { label: '<-- NO PARENT CATEGORY -->', value: '' },

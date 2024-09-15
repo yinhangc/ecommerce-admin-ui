@@ -79,7 +79,7 @@ export const ProductCategoryForm: React.FC<TProductCategoryFormProps> = (
     }
   };
 
-  // set dropdown options and set data if have existing data on init render
+  // Set dropdown options and set data if have existing data on init render
   useEffect(() => {
     const options: FormDropdownProps<TCategory>['options'] = [
       { label: '<-- NO PARENT CATEGORY -->', value: '' },
@@ -96,13 +96,16 @@ export const ProductCategoryForm: React.FC<TProductCategoryFormProps> = (
       );
     setCategoryOptions(options);
     if (existingData) {
-      console.log(existingData);
       const trimmedSlug = existingData.slug.match(/[^/]+$/);
+      console.log('ex', {
+        ...existingData,
+        slug: trimmedSlug?.[0] || existingData.slug,
+      });
       reset({ ...existingData, slug: trimmedSlug?.[0] || existingData.slug });
     }
   }, [categories, getValues, existingData, reset]);
 
-  // set prepend slug
+  // Set prepend slug
   useEffect(() => {
     let prepend = '/';
     if (watchParentCategoryId) {

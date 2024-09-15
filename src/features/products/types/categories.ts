@@ -6,9 +6,9 @@ export const categorySchema = z.object({
   id: z.number().optional(),
   name: z.string().min(1, requiredError),
   slug: z.string().min(1, requiredError),
-  // value should be parentCategoryId or undefined
+  // Value should be parentCategoryId or undefined
   parentId: z.preprocess((val) => {
-    if (val === '') return undefined;
+    if (val === '' || val === null) return undefined;
     if (typeof val === 'string') {
       const parsed = parseInt(val);
       if (!isNaN(parsed)) return parsed;

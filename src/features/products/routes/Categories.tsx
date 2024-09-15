@@ -78,9 +78,7 @@ export const Categories = () => {
     }),
     columnHelper.accessor('parent.slug', {
       cell: (info) => {
-        // console.log('aa', info.row.original.parent);
-        console.log(info.row.original);
-        return info.getValue();
+        return info.getValue() ?? '';
       },
       header: () => <span>Parent Slug</span>,
       footer: (props) => props.column.id,
