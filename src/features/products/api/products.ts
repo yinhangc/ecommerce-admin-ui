@@ -1,7 +1,7 @@
 import { getBaseQuery } from '@/lib/rtk-query';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { TListProduct } from '../types/listProduct';
-import { TProduct } from '../types/upsertProduct';
+import { TListProduct } from '../types/listProduct.type';
+import { TProduct } from '../types/upsertProduct.type';
 import { TListQuery } from '@/types';
 
 export const productsApi = createApi({

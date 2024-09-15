@@ -12,7 +12,7 @@ import {
   TProduct,
   THaveProductOptions,
   haveProductOptionsSchema,
-} from '../types/upsertProduct';
+} from '../types/upsertProduct.type';
 import { ProductOptionsDisplay } from './ProductOptionsDisplay';
 import { ProductOptionsInput } from './ProductOptionsInput';
 import { ProductVariantCombosInput } from './ProductVariantCombosInput';

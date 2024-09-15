@@ -17,12 +17,3 @@ export const categorySchema = z.object({
   }, z.number().optional()),
 });
 export type TCategory = z.infer<typeof categorySchema>;
-
-export type TCategoryInList = {
-  id: number;
-  name: string;
-  slug: string;
-  createdAt: string;
-  updatedAt: string;
-  parent: TCategoryInList;
-};

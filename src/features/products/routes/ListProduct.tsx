@@ -21,7 +21,7 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useListProductsMutation } from '../api/products';
-import { TListProduct } from '../types/listProduct';
+import { TListProduct } from '../types/listProduct.type';
 
 export const ListProduct = () => {
   const [listProducts] = useListProductsMutation();

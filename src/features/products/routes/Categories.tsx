@@ -19,7 +19,7 @@ import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useListCategoriesMutation } from '../api/categories';
-import { TCategoryInList } from '../types/categories';
+import { TCategoryInList } from '../types/category.type';
 
 export const Categories = () => {
   const [listCategories] = useListCategoriesMutation();

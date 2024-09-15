@@ -20,10 +20,10 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from '../api/products';
-import { TProduct, productSchema } from '../types/upsertProduct';
+import { TProduct, productSchema } from '../types/upsertProduct.type';
 import { ProductVariants } from './ProductVariants';
 import { useGetAllCategoriesForDropdownQuery } from '../api/categories';
-import { TCategory } from '../types/categories';
+import { TCategory } from '../types/category.type';
 
 type TProductFormProps = {
   existingData?: TProduct;

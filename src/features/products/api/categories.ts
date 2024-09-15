@@ -1,6 +1,6 @@
 import { getBaseQuery } from '@/lib/rtk-query';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { TCategory, TCategoryInList } from '../types/categories';
+import { TCategory, TCategoryInList } from '../types/category.type';
 import { TListQuery } from '@/types';
 
 export const categoriesApi = createApi({

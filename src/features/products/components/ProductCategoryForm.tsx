@@ -14,7 +14,7 @@ import {
   useGetAllCategoriesForDropdownQuery,
   useUpdateCategoryMutation,
 } from '../api/categories';
-import { TCategory, categorySchema } from '../types/categories';
+import { TCategory, categorySchema } from '../types/category.type';
 
 type TProductCategoryFormProps = {
   existingData?: TCategory;

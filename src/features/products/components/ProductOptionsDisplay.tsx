@@ -1,4 +1,4 @@
-import { TOption } from '../types/upsertProduct';
+import { TOption } from '../types/upsertProduct.type';
 
 type ProductOptionsInputProps = {
   option: TOption;
